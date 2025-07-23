@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.btn {
+  padding: 8px 4px;
+  border: 1px solid blue;
+}
+
+.btn:hover {
+  background-color: greenyellow;
+}
