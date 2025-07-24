@@ -2,6 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+And run this whenever you change your schema:
+
+npx prisma init
+npx prisma migrate dev --name init
+npx prisma db seed
+npx prisma generate
+
+
+
+
 First, run the development server:
 
 ```bash
