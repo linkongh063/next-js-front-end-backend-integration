@@ -1,4 +1,5 @@
 "use client";
+// import prisma from "@/lib/prisma";
 import { useState } from "react";
 
 export default function page() {
@@ -7,13 +8,15 @@ export default function page() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("user form", form);
-    const res = await fetch("http://localhost:3000/api/user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    console.log("Res Data of a post: ", data);
+    const user = await prisma.user.create({ data: { name: form.name, email: form.email } });
+    console.log('user', user)
+    // const res = await fetch("http://localhost:3000/api/user", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(form),
+    // });
+    // const data = await prisma.user.findMany();
+    // console.log("Res Data of a post: ", data);
     setForm({ name: "", email: "" });
     setUsers(data);
   };
