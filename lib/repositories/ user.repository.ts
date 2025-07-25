@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 export const UserRepository = {
   findAll: () => prisma.user.findMany(),
 
-  findById: (id: number) =>
+  findById: (id: string) =>
     prisma.user.findUnique({
       where: { id },
     }),
@@ -13,18 +13,18 @@ export const UserRepository = {
       where: { email },
     }),
 
-  create: (name: string, email: string) =>
+  create: (name: string, email: string, password: string, phone: string) =>
     prisma.user.create({
-      data: { name, email },
+      data: { name, email, password, phone },
     }),
 
-  update: (id: number, name: string, email: string) =>
+  update: (id: string, name: string, email: string) =>
     prisma.user.update({
       where: { id },
       data: { name, email },
     }),
 
-  delete: (id: number) =>
+  delete: (id: string) =>
     prisma.user.delete({
       where: { id },
     }),

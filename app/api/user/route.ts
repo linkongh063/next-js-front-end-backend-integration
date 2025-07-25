@@ -12,8 +12,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name, email } = await request.json();
-    const user = await UserService.createUser(name, email);
+    const { name, email, password, phone } = await request.json();
+    const user = await UserService.createUser(name, email, password, phone);
     return Response.json(user, { status: 201 });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 400 });
