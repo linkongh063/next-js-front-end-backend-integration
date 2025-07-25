@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { UserService } from '@/lib/services/user.service';
 import UserList from "../components/UserList";
 
 export default async function Page() {
-  const res = await fetch("http://localhost:3000/api/user");
-  const users = await res.json();
-  console.log("all users data", users);
+  const users = await UserService.getAllUsers();
+  // const res = await fetch("http://localhost:3000/api/user");
+  // const users = await res.json();
+  // console.log("all users data", users);
   return (
     <div>
       <div className="border flex justify-between items-center px-4 py-4">

@@ -9,3 +9,4 @@
 # one found in a remote Prisma Postgres URL, does not contain any sensitive information.
 
 DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdb"
+NEXT_PUBLIC_API_URL=http://localhost:3000

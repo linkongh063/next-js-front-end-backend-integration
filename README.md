@@ -1,4 +1,11 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Project structure in the backend
+
+| Layer        | What it does               | Reusability                  | Focus         |
+| ------------ | -------------------------- | ---------------------------- | ------------- |
+| `repository` | Pure Prisma queries        | ✅ Reusable across services   | 💾 DB logic   |
+| `service`    | Business rules             | ✅ Reusable across APIs/pages | 🧠 App logic  |
+| `api route`  | HTTP request/response only | ❌ Only used once             | 🌐 Networking |
+
 
 ## Getting Started
 

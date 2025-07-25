@@ -8,17 +8,16 @@ export default function page() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("user form", form);
-    const user = await prisma.user.create({ data: { name: form.name, email: form.email } });
-    console.log('user', user)
-    // const res = await fetch("http://localhost:3000/api/user", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(form),
-    // });
-    // const data = await prisma.user.findMany();
-    // console.log("Res Data of a post: ", data);
+    const res = await fetch("http://localhost:3000/api/user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await fetch("http://localhost:3000/api/user");
+    const users = await data.json();
     setForm({ name: "", email: "" });
-    setUsers(data);
+    setUsers(users);
   };
   return (
     <div>
