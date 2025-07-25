@@ -7,6 +7,35 @@
 # The following `prisma+postgres` URL is similar to the URL produced by running a local Prisma Postgres 
 # server with the `prisma dev` CLI command, when not choosing any non-default ports or settings. The API key, unlike the 
 # one found in a remote Prisma Postgres URL, does not contain any sensitive information.
+# DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdb"
 
-DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdb"
 NEXT_PUBLIC_API_URL=http://localhost:3000
+
+
+# Recommended for most uses
+DATABASE_URL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+
+# For uses requiring a connection without pgbouncer
+DATABASE_URL_UNPOOLED=postgresql://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+
+# Parameters for constructing your own connection string
+PGHOST=ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech
+PGHOST_UNPOOLED=ep-green-tree-a1y6hf2c.ap-southeast-1.aws.neon.tech
+PGUSER=neondb_owner
+PGDATABASE=neondb
+PGPASSWORD=npg_uEbhPK4v0BRs
+
+# Parameters for Vercel Postgres Templates
+POSTGRES_URL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+POSTGRES_URL_NON_POOLING=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+POSTGRES_USER=neondb_owner
+POSTGRES_HOST=ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech
+POSTGRES_PASSWORD=npg_uEbhPK4v0BRs
+POSTGRES_DATABASE=neondb
+POSTGRES_URL_NO_SSL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb
+POSTGRES_PRISMA_URL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require
+
+# Neon Auth environment variables for Next.js
+NEXT_PUBLIC_STACK_PROJECT_ID=provisioning
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=provisioning
+STACK_SECRET_SERVER_KEY=provisioning
