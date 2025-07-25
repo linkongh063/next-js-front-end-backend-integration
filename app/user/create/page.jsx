@@ -1,20 +1,20 @@
 "use client";
 // import prisma from "@/lib/prisma";
 import { useState } from "react";
-
+import { BASE_URL } from "@/utils/api";
 export default function page() {
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: "", email: "" });
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("user form", form);
-    const res = await fetch("http://localhost:3000/api/user", {
+    const res = await fetch(`${BASE_URL}/user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
 
-    const data = await fetch("http://localhost:3000/api/user");
+    const data = await fetch(`${BASE_URL}/user`);
     const users = await data.json();
     setForm({ name: "", email: "" });
     setUsers(users);
