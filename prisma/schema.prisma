@@ -11,27 +11,20 @@ model User {
   id        String     @id @default(uuid())
   name      String
   email     String     @unique
+  createdAt DateTime   @default(now())
   password  String
   phone     String?
   role      Role       @default(CUSTOMER)
+  updatedAt DateTime   @updatedAt
   addresses Address[]
+  carts     Cart[]
   orders    Order[]
   reviews   Review[]
   wishlists Wishlist[]
-  carts     Cart[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
-
-enum Role {
-  ADMIN
-  CUSTOMER
-  STAFF
 }
 
 model Address {
   id           String   @id @default(uuid())
-  user         User     @relation(fields: [userId], references: [id])
   userId       String
   fullName     String
   phone        String
@@ -43,6 +36,7 @@ model Address {
   country      String
   isDefault    Boolean  @default(false)
   createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
   Order        Order[]
 }
 
@@ -50,11 +44,11 @@ model Category {
   id        String     @id @default(uuid())
   name      String
   slug      String     @unique
-  parent    Category?  @relation("CategoryParent", fields: [parentId], references: [id])
   parentId  String?
+  createdAt DateTime   @default(now())
+  parent    Category?  @relation("CategoryParent", fields: [parentId], references: [id],  onDelete: Cascade)
   children  Category[] @relation("CategoryParent")
   products  Product[]
-  createdAt DateTime   @default(now())
 }
 
 model Brand {
@@ -62,8 +56,8 @@ model Brand {
   name      String
   slug      String    @unique
   logoUrl   String?
-  products  Product[]
   createdAt DateTime  @default(now())
+  products  Product[]
 }
 
 model Product {
@@ -71,30 +65,22 @@ model Product {
   name        String
   slug        String           @unique
   description String?
-  brand       Brand?           @relation(fields: [brandId], references: [id])
   brandId     String?
-  category    Category?        @relation(fields: [categoryId], references: [id])
   categoryId  String?
-  variants    ProductVariant[]
-  images      ProductImage[]
-  reviews     Review[]
-  wishlists   Wishlist[]
   status      ProductStatus    @default(DRAFT)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-
-  orderItems OrderItem[]
-}
-
-enum ProductStatus {
-  ACTIVE
-  INACTIVE
-  DRAFT
+  orderItems  OrderItem[]
+  brand       Brand?           @relation(fields: [brandId], references: [id])
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  images      ProductImage[]
+  variants    ProductVariant[]
+  reviews     Review[]
+  wishlists   Wishlist[]
 }
 
 model ProductVariant {
   id                  String         @id @default(uuid())
-  product             Product        @relation(fields: [productId], references: [id])
   productId           String
   sku                 String         @unique
   price               Decimal
@@ -102,26 +88,25 @@ model ProductVariant {
   stockQuantity       Int
   stockAlertThreshold Int            @default(5)
   isDefault           Boolean        @default(false)
-  orderItems          OrderItem[]
+  createdAt           DateTime       @default(now())
   cartItems           CartItem[]
   inventoryLogs       InventoryLog[]
-  createdAt           DateTime       @default(now())
+  orderItems          OrderItem[]
+  product             Product        @relation(fields: [productId], references: [id])
 }
 
 model ProductImage {
   id         String   @id @default(uuid())
-  product    Product  @relation(fields: [productId], references: [id])
   productId  String
   imageUrl   String
   isFeatured Boolean  @default(false)
   createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
 }
 
 model Order {
   id            String        @id @default(uuid())
-  user          User          @relation(fields: [userId], references: [id])
   userId        String
-  address       Address       @relation(fields: [addressId], references: [id])
   addressId     String
   orderNumber   String        @unique
   status        OrderStatus   @default(PENDING)
@@ -130,10 +115,86 @@ model Order {
   total         Decimal
   discount      Decimal       @default(0)
   shippingCost  Decimal       @default(0)
+  placedAt      DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  address       Address       @relation(fields: [addressId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
   orderItems    OrderItem[]
+}
 
-  placedAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model OrderItem {
+  id         String         @id @default(uuid())
+  orderId    String
+  productId  String
+  variantId  String
+  quantity   Int
+  unitPrice  Decimal
+  totalPrice Decimal
+  order      Order          @relation(fields: [orderId], references: [id])
+  product    Product        @relation(fields: [productId], references: [id])
+  variant    ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model InventoryLog {
+  id          String          @id @default(uuid())
+  variantId   String
+  change      Int
+  reason      InventoryReason
+  referenceId String?
+  note        String?
+  createdAt   DateTime        @default(now())
+  variant     ProductVariant  @relation(fields: [variantId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  productId  String
+  userId     String
+  rating     Int
+  comment    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String         @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int
+  createdAt DateTime       @default(now())
+  cart      Cart           @relation(fields: [cartId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  STAFF
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
 }
 
 enum OrderStatus {
@@ -151,74 +212,10 @@ enum PaymentStatus {
   REFUNDED
 }
 
-model OrderItem {
-  id         String         @id @default(uuid())
-  orderId    String
-  product    Product        @relation(fields: [productId], references: [id])
-  productId  String
-  variant    ProductVariant @relation(fields: [variantId], references: [id])
-  variantId  String
-  quantity   Int
-  unitPrice  Decimal
-  totalPrice Decimal
-  order      Order          @relation(fields: [orderId], references: [id])
-  // orders Order[]
-}
-
-model InventoryLog {
-  id          String          @id @default(uuid())
-  variant     ProductVariant  @relation(fields: [variantId], references: [id])
-  variantId   String
-  change      Int
-  reason      InventoryReason
-  referenceId String?
-  note        String?
-  createdAt   DateTime        @default(now())
-}
-
 enum InventoryReason {
   SALE
   RESTOCK
   RETURN
   CORRECTION
   MANUAL
-}
-
-model Review {
-  id         String   @id @default(uuid())
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  String
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  rating     Int
-  comment    String?
-  isApproved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-}
-
-model Cart {
-  id        String     @id @default(uuid())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  items     CartItem[]
-  createdAt DateTime   @default(now())
-}
-
-model CartItem {
-  id        String         @id @default(uuid())
-  cart      Cart           @relation(fields: [cartId], references: [id])
-  cartId    String
-  variant   ProductVariant @relation(fields: [variantId], references: [id])
-  variantId String
-  quantity  Int
-  createdAt DateTime       @default(now())
-}
-
-model Wishlist {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
 }

@@ -5,27 +5,39 @@ export default function CategoryPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        // Simulating API call with JSON data
-        const response = await fetch("/api/category");
-        const data = await response.json();
-        console.log('data', data)
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
+  const deleteCategory = async (category) => {
+    try {
+      const res = await fetch(`/api/category/${category.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Deleted successfully:", data);
+      } else {
+        console.error("Delete failed:", data.error);
       }
+      fetchCategories()
+    } catch (error) {
+      console.error("Error while deleting:", error);
     }
-    fetchCategories();
-  }, []);
+  };
 
   const renderCategoryTree = (category) => (
-    <li key={category.id} className="border p-2 rounded">
-      <h2 className="text-lg font-semibold">{category.name}</h2>
-      <p>Slug: {category.slug}</p>
+    <li key={category.id} className="border-4 p-2 rounded bg-red-200 my-2">
+      <div className="bg-amber-200 px-4 flex justify-between items-center">
+        <div className="flex items-center py-1">
+          <h2 className="text-lg font-semibold">{category.name}</h2>
+          <p className="px-4">Slug: {category.slug}</p>
+        </div>
+        <button
+          onClick={() => deleteCategory(category)}
+          className="px-4 text-white font-bold hover:cursor-pointer hover:bg-red-900 py-1 rounded bg-red-500 my-2"
+        >
+          X
+        </button>
+      </div>
       {category.children && category.children.length > 0 && (
         <ul className="ml-4 space-y-2">
           {category.children.map((child) => renderCategoryTree(child))}
@@ -33,6 +45,24 @@ export default function CategoryPage() {
       )}
     </li>
   );
+
+  async function fetchCategories() {
+    try {
+      // Simulating API call with JSON data
+      const response = await fetch("/api/category");
+      const data = await response.json();
+      console.log("data", data);
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return (
     <div>

@@ -34,6 +34,7 @@ export default function NewCategory() {
       try {
         const response = await fetch("/api/category/creation-list");
         const data = await response.json();
+        console.log('data new category list', data)
         setCategories(data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
