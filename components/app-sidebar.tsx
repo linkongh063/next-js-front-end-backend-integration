@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -12,149 +12,305 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-
-// This is sample data.
+} from "@/components/ui/sidebar";
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Admin User",
+    email: "admin@ecommerce.com",
+    avatar: "/avatars/admin.jpg",
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      name: "Ecom BD",
+      logo: PieChart,
+      plan: "Pro",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "Warehouse Unit",
+      logo: Map,
+      plan: "Basic",
     },
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Admin",
+      url: "/dashboard",
       icon: SquareTerminal,
-      isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "Dashboard",
+          url: "/dashboard",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
+      title: "Orders",
+      url: "/dashboard/orders",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "All Orders",
+          url: "/dashboard/orders",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Pending Orders",
+          url: "/dashboard/orders/pending",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "Completed Orders",
+          url: "/dashboard/orders/completed",
+        },
+      ],
+    },
+    {
+      title: "Products",
+      url: "/dashboard/products",
+      icon: Bot,
+      items: [
+        {
+          title: "All Products",
+          url: "/dashboard/products",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "Add Product",
+          url: "/dashboard/products/create",
+        },
+        {
+          title: "Categories",
+          url: "/categories",
+        },
+        {
+          title: "Brands",
+          url: "/dashboard/brands",
+        },
+      ],
+    },
+    {
+      title: "Customers",
+      url: "/dashboard/customers",
+      icon: GalleryVerticalEnd,
+      items: [
+        {
+          title: "Customer List",
+          url: "/dashboard/customers",
+        },
+        {
+          title: "Reviews",
+          url: "/dashboard/reviews",
+        },
+      ],
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics",
+      icon: PieChart,
+    },
+    {
+      title: "Marketing",
+      url: "/dashboard/marketing",
+      icon: AudioWaveform,
+      items: [
+        {
+          title: "Campaigns",
+          url: "/dashboard/marketing/campaigns",
+        },
+        {
+          title: "Coupons",
+          url: "/dashboard/marketing/coupons",
+        },
+        {
+          title: "Banners",
+          url: "/dashboard/marketing/banners",
         },
       ],
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "General Settings",
+          url: "/dashboard/settings/general",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Shipping",
+          url: "/dashboard/settings/shipping",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "Payments",
+          url: "/dashboard/settings/payments",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Tax",
+          url: "/dashboard/settings/tax",
+        },
+        {
+          title: "Admin Users",
+          url: "/dashboard/settings/admins",
         },
       ],
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
+      name: "Flash Sale Setup",
+      url: "/dashboard/marketing/flash-sale",
       icon: Frame,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Featured Products",
+      url: "/dashboard/products/featured",
+      icon: BookOpen,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Return & Refund Management",
+      url: "/dashboard/orders/returns",
+      icon: Command,
     },
   ],
-}
+};
+// This is sample data.
+// const data = {
+//   user: {
+//     name: "shadcn",
+//     email: "m@example.com",
+//     avatar: "/avatars/shadcn.jpg",
+//   },
+//   teams: [
+//     {
+//       name: "Acme Inc",
+//       logo: GalleryVerticalEnd,
+//       plan: "Enterprise",
+//     },
+//     {
+//       name: "Acme Corp.",
+//       logo: AudioWaveform,
+//       plan: "Startup",
+//     },
+//     {
+//       name: "Evil Corp.",
+//       logo: Command,
+//       plan: "Free",
+//     },
+//   ],
+//   navMain: [
+//     {
+//       title: "Playground",
+//       url: "#",
+//       icon: SquareTerminal,
+//       isActive: true,
+//       items: [
+//         {
+//           title: "History",
+//           url: "#",
+//         },
+//         {
+//           title: "Starred",
+//           url: "#",
+//         },
+//         {
+//           title: "Settings",
+//           url: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Models",
+//       url: "#",
+//       icon: Bot,
+//       items: [
+//         {
+//           title: "Genesis",
+//           url: "#",
+//         },
+//         {
+//           title: "Explorer",
+//           url: "#",
+//         },
+//         {
+//           title: "Quantum",
+//           url: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Documentation",
+//       url: "#",
+//       icon: BookOpen,
+//       items: [
+//         {
+//           title: "Introduction",
+//           url: "#",
+//         },
+//         {
+//           title: "Get Started",
+//           url: "#",
+//         },
+//         {
+//           title: "Tutorials",
+//           url: "#",
+//         },
+//         {
+//           title: "Changelog",
+//           url: "#",
+//         },
+//       ],
+//     },
+//     {
+//       title: "Settings",
+//       url: "#",
+//       icon: Settings2,
+//       items: [
+//         {
+//           title: "General",
+//           url: "#",
+//         },
+//         {
+//           title: "Team",
+//           url: "#",
+//         },
+//         {
+//           title: "Billing",
+//           url: "#",
+//         },
+//         {
+//           title: "Limits",
+//           url: "#",
+//         },
+//       ],
+//     },
+//   ],
+//   projects: [
+//     {
+//       name: "Design Engineering",
+//       url: "#",
+//       icon: Frame,
+//     },
+//     {
+//       name: "Sales & Marketing",
+//       url: "#",
+//       icon: PieChart,
+//     },
+//     {
+//       name: "Travel",
+//       url: "#",
+//       icon: Map,
+//     },
+//   ],
+// }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -171,5 +327,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
