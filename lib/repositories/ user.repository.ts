@@ -24,6 +24,12 @@ export const UserRepository = {
       data: { name, email },
     }),
 
+  updateProfilePicture: (id: string, profilePicture: string | null) =>
+    prisma.user.update({
+      where: { id },
+      data: { profilePicture },
+    }),
+
   delete: (id: string) =>
     prisma.user.delete({
       where: { id },

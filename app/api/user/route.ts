@@ -22,8 +22,16 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { id, name, email } = await request.json();
-    const user = await UserService.updateUser(Number(id), name, email);
+    const { id, name, email, profilePicture } = await request.json();
+    
+    // If profilePicture is provided, update it separately
+    if (profilePicture !== undefined) {
+      const user = await UserService.updateProfilePicture(id, profilePicture);
+      return Response.json(user);
+    }
+    
+    // Otherwise, update name and email
+    const user = await UserService.updateUser(id, name, email);
     return Response.json(user);
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 400 });
@@ -33,7 +41,7 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();
-    await UserService.deleteUser(Number(id));
+    await UserService.deleteUser(id);
     return Response.json({ message: 'User deleted' });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 400 });

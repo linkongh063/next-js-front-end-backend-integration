@@ -2,14 +2,28 @@ import { ProductVariantService } from '@/lib/services/product-variant.service';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-    const variants = await ProductVariantService.getVariants();
-    return NextResponse.json(variants);
+    try {
+        const variants = await ProductVariantService.getVariants();
+        return NextResponse.json(variants);
+    } catch (error) {
+        console.error('Error fetching product variants:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch product variants', details: error.message },
+            { status: 500 }
+        );
+    }
 }
 
 export async function POST(req: Request) {
-    const body = await req.json();
-    console.log('body', body)
-    const newVariant = await ProductVariantService.createVariant(body);
-    console.log('new varient', newVariant)
-    return NextResponse.json(newVariant, { status: 201 });
+    try {
+        const body = await req.json();
+        const newVariant = await ProductVariantService.createVariant(body);
+        return NextResponse.json(newVariant, { status: 201 });
+    } catch (error) {
+        console.error('Error creating product variant:', error);
+        return NextResponse.json(
+            { error: 'Failed to create product variant', details: error.message },
+            { status: 500 }
+        );
+    }
 }

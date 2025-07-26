@@ -9,9 +9,31 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const data = await req.json();
-  const updated = await ProductService.updateProduct(params.id, data);
-  return NextResponse.json(updated);
+  try {
+    const data = await req.json();
+    const updated = await ProductService.updateProduct(params.id, data);
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return NextResponse.json(
+      { error: 'Failed to update product', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const data = await req.json();
+    const updated = await ProductService.updateProduct(params.id, data);
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return NextResponse.json(
+      { error: 'Failed to update product', details: error.message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {

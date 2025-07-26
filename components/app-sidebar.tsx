@@ -75,17 +75,17 @@ const data = {
       ],
     },
     {
-      title: "Products",
+      title: "Manage Products",
       url: "/dashboard/products",
       icon: Bot,
       items: [
         {
-          title: "All Products",
-          url: "/dashboard/products",
+          title: "All Product",
+          url: "/products",
         },
         {
-          title: "Add Product",
-          url: "/dashboard/products/create",
+          title: "Variant & Stock",
+          url: "/product-variant",
         },
         {
           title: "Categories",
@@ -98,13 +98,13 @@ const data = {
       ],
     },
     {
-      title: "Customers",
+      title: "Customers & Reviews",
       url: "/dashboard/customers",
       icon: GalleryVerticalEnd,
       items: [
         {
           title: "Customer List",
-          url: "/dashboard/customers",
+          url: "/customers",
         },
         {
           title: "Reviews",
@@ -112,30 +112,30 @@ const data = {
         },
       ],
     },
-    {
-      title: "Analytics",
-      url: "/dashboard/analytics",
-      icon: PieChart,
-    },
-    {
-      title: "Marketing",
-      url: "/dashboard/marketing",
-      icon: AudioWaveform,
-      items: [
-        {
-          title: "Campaigns",
-          url: "/dashboard/marketing/campaigns",
-        },
-        {
-          title: "Coupons",
-          url: "/dashboard/marketing/coupons",
-        },
-        {
-          title: "Banners",
-          url: "/dashboard/marketing/banners",
-        },
-      ],
-    },
+    // {
+    //   title: "Analytics",
+    //   url: "/dashboard/analytics",
+    //   icon: PieChart,
+    // },
+    // {
+    //   title: "Marketing",
+    //   url: "/dashboard/marketing",
+    //   icon: AudioWaveform,
+    //   items: [
+    //     {
+    //       title: "Campaigns",
+    //       url: "/dashboard/marketing/campaigns",
+    //     },
+    //     {
+    //       title: "Coupons",
+    //       url: "/dashboard/marketing/coupons",
+    //     },
+    //     {
+    //       title: "Banners",
+    //       url: "/dashboard/marketing/banners",
+    //     },
+    //   ],
+    // },
     {
       title: "Settings",
       url: "/dashboard/settings",
@@ -170,16 +170,16 @@ const data = {
       url: "/dashboard/marketing/flash-sale",
       icon: Frame,
     },
-    {
-      name: "Featured Products",
-      url: "/dashboard/products/featured",
-      icon: BookOpen,
-    },
-    {
-      name: "Return & Refund Management",
-      url: "/dashboard/orders/returns",
-      icon: Command,
-    },
+    // {
+    //   name: "Featured Products",
+    //   url: "/dashboard/products/featured",
+    //   icon: BookOpen,
+    // },
+    // {
+    //   name: "Return & Refund Management",
+    //   url: "/dashboard/orders/returns",
+    //   icon: Command,
+    // },
   ],
 };
 // This is sample data.

@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  name      String
-  email     String     @unique
-  createdAt DateTime   @default(now())
-  password  String
-  phone     String?
-  role      Role       @default(CUSTOMER)
-  updatedAt DateTime   @updatedAt
-  addresses Address[]
-  carts     Cart[]
-  orders    Order[]
-  reviews   Review[]
-  wishlists Wishlist[]
+  id             String     @id @default(uuid())
+  name           String
+  email          String     @unique
+  createdAt      DateTime   @default(now())
+  password       String
+  phone          String?
+  profilePicture String?
+  role           Role       @default(CUSTOMER)
+  updatedAt      DateTime   @updatedAt
+  addresses      Address[]
+  carts          Cart[]
+  orders         Order[]
+  reviews        Review[]
+  wishlists      Wishlist[]
 }
 
 model Address {

@@ -14,11 +14,15 @@ export const UserService = {
         return UserRepository.create(name, email, password, phone);
     },
 
-    updateUser: async (id: number, name: string, email: string) => {
+    updateUser: async (id: string, name: string, email: string) => {
         return UserRepository.update(id, name, email);
     },
 
-    deleteUser: async (id: number) => {
+    deleteUser: async (id: string) => {
         return UserRepository.delete(id);
+    },
+
+    updateProfilePicture: async (id: string, profilePicture: string | null) => {
+        return UserRepository.updateProfilePicture(id, profilePicture);
     },
 };
