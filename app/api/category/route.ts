@@ -15,7 +15,10 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         console.log('hello backend')
-        const newCategory = await CategoryService.createCategory(request.body);
+        // Parse the request body
+        const body = await request.json();
+        console.log("Parsed body:", body);
+        const newCategory = await CategoryService.createCategory(body);
         return Response.json(newCategory, { status: 201 });
 
     } catch (error: any) {

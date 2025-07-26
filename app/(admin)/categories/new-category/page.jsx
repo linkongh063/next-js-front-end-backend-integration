@@ -1,17 +1,19 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewCategory() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [parentId, setParentId] = useState("");
+  const [parentId, setParentId] = useState(null);
+  const [categories, setCategories] = useState([]);
+
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     const categoryData = { name, slug, parentId };
-    console.log('category', categoryData)
+    console.log("category", categoryData);
     const response = await fetch("/api/category", {
       method: "POST",
       headers: {
@@ -21,11 +23,24 @@ export default function NewCategory() {
     });
 
     if (response.ok) {
-      router.push("/admin/categories"); // Redirect to categories page after successful submission
+      router.push("/categories"); // Redirect to categories page after successful submission
     } else {
       console.error("Failed to create category");
     }
   };
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/category/creation-list");
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   return (
     <div className="max-w-lg mx-auto mt-8">
@@ -74,15 +89,21 @@ export default function NewCategory() {
             htmlFor="parentId"
             className="block text-sm font-medium text-gray-700"
           >
-            Parent Category ID (Optional)
+            Parent Category (Optional)
           </label>
-          <input
+          <select
             id="parentId"
-            type="text"
             value={parentId}
             onChange={(e) => setParentId(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
+          >
+            <option value="">None</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="submit"
