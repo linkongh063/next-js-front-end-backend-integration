@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { UserService } from '@/lib/services/user.service';
-import UserList from "../components/UserList";
+import UserList from "../../components/UserList";
 
 export default async function Page() {
   const users = await UserService.getAllUsers();
+  console.log('users', users)
   // const res = await fetch("http://localhost:3000/api/user");
   // const users = await res.json();
   // console.log("all users data", users);
