@@ -3,18 +3,20 @@ import { ProductImageService } from '@/lib/services/product-image.service';
 import { unlink } from 'fs/promises';
 import path from 'path';
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const image = await ProductImageService.getImageById(params.id);
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const image = await ProductImageService.getImageById(id);
   if (!image) {
     return NextResponse.json({ error: 'Not Found' }, { status: 404 });
   }
   return NextResponse.json(image);
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const updatedImage = await ProductImageService.updateImage(params.id, body);
+    const updatedImage = await ProductImageService.updateImage(id, body);
 
     // Serialize date
     const serialized = {
@@ -32,10 +34,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const updatedImage = await ProductImageService.updateImage(params.id, body);
+    const updatedImage = await ProductImageService.updateImage(id, body);
 
     // Serialize date
     const serialized = {
@@ -53,14 +56,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     // First get the image to retrieve the imageUrl before deleting
-    const image = await ProductImageService.getImageById(params.id);
+    const image = await ProductImageService.getImageById(id);
     
     if (image) {
       // Delete from database
-      await ProductImageService.deleteImage(params.id);
+      await ProductImageService.deleteImage(id);
       
       // Delete physical file
       try {

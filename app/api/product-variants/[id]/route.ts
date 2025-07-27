@@ -1,17 +1,19 @@
 import { ProductVariantService } from '@/lib/services/product-variant.service';
 import { NextResponse } from 'next/server';
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const variant = await ProductVariantService.getVariantById(params.id);
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const variant = await ProductVariantService.getVariantById(id);
   return variant
     ? NextResponse.json(variant)
     : NextResponse.json({ error: 'Variant not found' }, { status: 404 });
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const updated = await ProductVariantService.updateVariant(params.id, body);
+    const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating product variant:', error);
@@ -22,10 +24,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
-    const updated = await ProductVariantService.updateVariant(params.id, body);
+    const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating product variant:', error);
@@ -36,9 +39,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await ProductVariantService.deleteVariant(params.id);
+    const { id } = await params;
+    await ProductVariantService.deleteVariant(id);
     return NextResponse.json({ message: 'Deleted' });
   } catch (error) {
     console.error('Error deleting product variant:', error);
