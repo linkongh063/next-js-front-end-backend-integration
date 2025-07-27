@@ -25,7 +25,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     };
 
     return NextResponse.json(serialized);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating product image:', error);
     return NextResponse.json(
       { error: 'Failed to update product image', details: error.message },
@@ -47,7 +47,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     };
 
     return NextResponse.json(serialized);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating product image:', error);
     return NextResponse.json(
       { error: 'Failed to update product image', details: error.message },
@@ -72,7 +72,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
         const filepath = path.join(process.cwd(), 'public', 'uploads', 'products', filename);
         
         await unlink(filepath);
-      } catch (fileError) {
+      } catch (fileError: any) {
         // File might not exist, which is okay
         if (fileError.code !== 'ENOENT') {
           console.error('Error deleting physical file:', fileError);
@@ -82,7 +82,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     }
     
     return NextResponse.json({ message: 'Deleted' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting product image:', error);
     return NextResponse.json(
       { error: 'Failed to delete product image', details: error.message },

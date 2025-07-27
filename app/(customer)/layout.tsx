@@ -9,7 +9,8 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
-export default function layout({ children }) {
+
+export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <NavigationMenu>

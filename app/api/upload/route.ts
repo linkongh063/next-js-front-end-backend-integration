@@ -91,7 +91,7 @@ export async function DELETE(request: NextRequest) {
         success: true,
         message: 'File deleted successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       // File might not exist, which is okay
       if (error.code === 'ENOENT') {
         return NextResponse.json({
@@ -102,7 +102,7 @@ export async function DELETE(request: NextRequest) {
       throw error;
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete file error:', error);
     return NextResponse.json(
       { error: 'Failed to delete file' },

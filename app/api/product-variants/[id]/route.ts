@@ -15,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const body = await req.json();
     const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating product variant:', error);
     return NextResponse.json(
       { error: 'Failed to update product variant', details: error.message },
@@ -30,7 +30,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating product variant:', error);
     return NextResponse.json(
       { error: 'Failed to update product variant', details: error.message },
@@ -44,7 +44,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     const { id } = await params;
     await ProductVariantService.deleteVariant(id);
     return NextResponse.json({ message: 'Deleted' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting product variant:', error);
     return NextResponse.json(
       { error: 'Failed to delete product variant', details: error.message },

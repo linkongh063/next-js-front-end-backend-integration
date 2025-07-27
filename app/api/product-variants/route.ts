@@ -5,7 +5,7 @@ export async function GET() {
     try {
         const variants = await ProductVariantService.getVariants();
         return NextResponse.json(variants);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching product variants:', error);
         return NextResponse.json(
             { error: 'Failed to fetch product variants', details: error.message },
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const newVariant = await ProductVariantService.createVariant(body);
         return NextResponse.json(newVariant, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating product variant:', error);
         return NextResponse.json(
             { error: 'Failed to create product variant', details: error.message },

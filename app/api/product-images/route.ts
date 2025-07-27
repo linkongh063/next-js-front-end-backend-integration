@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const images = await ProductImageService.getAllImages();
     return NextResponse.json(images);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching product images:', error);
     return NextResponse.json(
       { error: 'Failed to fetch product images', details: error.message },
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     };
 
     return NextResponse.json(serialized, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating product image:', error);
     return NextResponse.json(
       { error: 'Failed to create product image', details: error.message },
