@@ -13,8 +13,16 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default function AdminLayout({ children }) {
+    // const cookieStore = cookies()
+    // const session = cookieStore.get('session') // your session cookie
+  
+    // if (!session) {
+    //   redirect('/') // 👈 protected route redirect
+    // }
   return (
     <SidebarProvider>
       <AppSidebar />

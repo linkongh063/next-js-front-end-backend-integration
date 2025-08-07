@@ -53,6 +53,8 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import { BASE_URL } from "@/utils/api";
+import { useRouter } from 'next/navigation';
+
 
 export default function BandTable({data}) {
   const [brands, setBrands] = useState([]);
@@ -70,7 +72,7 @@ export default function BandTable({data}) {
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -156,9 +158,10 @@ export default function BandTable({data}) {
 
     setIsSubmitting(true);
     try {
-      const url = editingBrand ? `${BASE_URL}/brands/${editingBrand.id}` : "/brands";
-      const method = editingBrand ? "PUT" : "POST";
-      
+      const url = editingBrand ? `${BASE_URL}/brands/${editingBrand.id}` : `${BASE_URL}/brands/`;
+      const method = editingBrand ? "PATCH" : "POST";
+      console.log('Form data before submission:', formData);
+      console.log('Submitting to URL:', url, 'with method:', method);
       const response = await fetch(url, {
         method,
         headers: {
@@ -166,11 +169,12 @@ export default function BandTable({data}) {
         },
         body: JSON.stringify(formData),
       });
-
+      console.log('Response status:', response);
       if (!response.ok) {
         throw new Error(`Failed to ${editingBrand ? "update" : "create"} brand`);
       }
-
+      
+      router.push('/brands'); // or dynamic: `/product/${id}`
       handleCloseDialog();
       // You could add success toast here
     } catch (error) {

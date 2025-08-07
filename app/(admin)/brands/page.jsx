@@ -10,7 +10,7 @@ export default async function page() {
     return <div>Error loading brands</div>;
   }
   const data = await brands.json();
-  console.log("Fetched brands:", data);
+  console.log("# Fetched brands #:", data.length);
   return (
     <div>
       <Suspense fallback={<div><Skeleton /></div>}>

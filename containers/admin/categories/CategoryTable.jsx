@@ -58,6 +58,7 @@ import {
   RefreshCw,
   X
 } from "lucide-react";
+import { BASE_URL } from "@/utils/api";
 
 export default function CategoryTable({data}) {
   const [categories, setCategories] = useState([]);
@@ -204,8 +205,8 @@ export default function CategoryTable({data}) {
     setSubmitError(null); // Clear any previous submit errors
     
     try {
-      const url = editingCategory ? `/api/category/${editingCategory.id}` : "/api/category";
-      const method = editingCategory ? "PUT" : "POST";
+      const url = editingCategory ? `${BASE_URL}/category/${editingCategory.id}` : `${BASE_URL}/category`;
+      const method = editingCategory ? "PATCH" : "POST";
       
       const response = await fetch(url, {
         method,
