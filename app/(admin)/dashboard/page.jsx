@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-
+import { auth, currentUser } from "@clerk/nextjs/server";
 export default async function page() {
-  const session = await auth();
 
-  if (!session || session.user?.email !== "linkon.softzino@gmail.com") {
-    redirect("/login"); // Redirect non-admins
-  }
+  const authObj = await auth();
+  const userObj = await currentUser();
+
+  console.log("User Object:", authObj);
+  console.log("Current User:", userObj);
 
   return (
     <div>

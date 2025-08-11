@@ -9,11 +9,16 @@
 # one found in a remote Prisma Postgres URL, does not contain any sensitive information.
 # DATABASE_URL="postgresql://postgres:password@localhost:5432/nextdb"
 
-NEXT_PUBLIC_API_BASE_URL=https://next-js-front-end-backend-integrati.vercel.app/api
+# NEXT_PUBLIC_API_BASE_URL=https://next-js-front-end-backend-integrati.vercel.app/api
 
+AUTH_SECRET="XvjVRZuUS8oNDsOrJ1Z5HWfAbAJcVDk7UNuGlin9c4A=" # Added by `npx auth`. Read more: https://cli.authjs.dev
+
+AUTH_GOOGLE_ID=756735909881-2aiajsemodp7flb7ck6fodvqqe8g7hp0.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=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
 
 
 # Recommended for most uses
+# psql 'postgresql://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 DATABASE_URL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6hf2c-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
 
 # For uses requiring a connection without pgbouncer
@@ -40,3 +45,8 @@ POSTGRES_PRISMA_URL=postgres://neondb_owner:npg_uEbhPK4v0BRs@ep-green-tree-a1y6h
 NEXT_PUBLIC_STACK_PROJECT_ID=provisioning
 NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=provisioning
 STACK_SECRET_SERVER_KEY=provisioning
+
+
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YWJzb2x1dGUtY291Z2FyLTc0LmNsZXJrLmFjY291bnRzLmRldiQ
+CLERK_SECRET_KEY=sk_test_JCcIgw3hKCimKEcwn8vHOWFOObL0Eo7oIMP5XPoQNP

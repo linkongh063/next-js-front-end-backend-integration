@@ -13,7 +13,7 @@ export default function LoginPage() {
           </div>
           Acme Inc.
         </a>
-        <form
+        {/* <form
         className="text-center border-2 py-2"
           action={async () => {
             "use server";
@@ -21,7 +21,7 @@ export default function LoginPage() {
           }}
         >
           <button type="submit">Signin with Google</button>
-        </form>
+        </form> */}
         <LoginForm />
       </div>
     </div>
