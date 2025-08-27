@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div>
+          {/* <div>
             <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-16 flex items-center justify-center px-4">
               <h1 className="text-white text-2xl font-bold">Welcome to ecomx</h1>
               <div className="flex items-center ml-auto">
@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="">
             {children}
           </div>

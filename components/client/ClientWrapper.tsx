@@ -1,4 +1,4 @@
-import Link from "next/link";
+import React from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,10 +9,17 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
-
-export default function layout({ children }: { children: React.ReactNode }) {
+import { MegaMenu } from "./menu/Megamenu";
+export default function ClientWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div>
+      <div className="border-b border-gray-200">
+        <MegaMenu />
+      </div>
       <div>{children}</div>
     </div>
   );

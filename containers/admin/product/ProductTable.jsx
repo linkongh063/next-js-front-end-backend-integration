@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ import {
 } from "lucide-react";
 
 export default function ProductsTable({propsProducts, propsBrands, propsCategories}) {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -131,6 +133,27 @@ export default function ProductsTable({propsProducts, propsBrands, propsCategori
     fetchBrands();
     fetchCategories();
   }, []);
+
+  // Sync from props when parent provides updated data (e.g., after edit/update/delete)
+  useEffect(() => {
+    if (Array.isArray(propsProducts)) {
+      setProducts(propsProducts);
+    }
+    if (Array.isArray(propsBrands)) {
+      setBrands(propsBrands);
+    }
+    if (Array.isArray(propsCategories)) {
+      setCategories(propsCategories);
+    }
+    // Ensure loading is cleared when props are present
+    if (
+      Array.isArray(propsProducts) ||
+      Array.isArray(propsBrands) ||
+      Array.isArray(propsCategories)
+    ) {
+      setLoading(false);
+    }
+  }, [propsProducts, propsBrands, propsCategories]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -338,7 +361,8 @@ export default function ProductsTable({propsProducts, propsBrands, propsCategori
         }
       }
 
-      await fetchProducts(); // Refresh the list
+      // Trigger re-fetch of server props and let useEffect sync local state
+      router.refresh();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving product:", error);
@@ -359,7 +383,8 @@ export default function ProductsTable({propsProducts, propsBrands, propsCategori
         throw new Error("Failed to delete product");
       }
 
-      await fetchProducts(); // Refresh the list
+      // Trigger re-fetch of server props and let useEffect sync local state
+      router.refresh();
     } catch (error) {
       console.error("Error deleting product:", error);
     }

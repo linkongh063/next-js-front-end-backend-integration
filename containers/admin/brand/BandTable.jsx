@@ -196,6 +196,8 @@ export default function BandTable({data}) {
         throw new Error("Failed to delete brand");
       }
 
+      router.refresh()
+
       // You could add success toast here
     } catch (error) {
       console.error("Error deleting brand:", error);
