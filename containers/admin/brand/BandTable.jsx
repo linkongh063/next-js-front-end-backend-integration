@@ -74,12 +74,12 @@ export default function BandTable({data}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  // Sync local state from server props whenever data changes
   useEffect(() => {
     setLoading(true);
-    console.log("Initial data:", data);
-    setBrands([...data]);
+    setBrands(Array.isArray(data) ? [...data] : []);
     setLoading(false);
-  }, []);
+  }, [data]);
 
   // Filter and sort brands
   const filteredAndSortedBrands = useMemo(() => {
@@ -174,7 +174,8 @@ export default function BandTable({data}) {
         throw new Error(`Failed to ${editingBrand ? "update" : "create"} brand`);
       }
       
-      router.push('/brands'); // or dynamic: `/product/${id}`
+      // Trigger server re-fetch and update props without navigation
+      router.refresh();
       handleCloseDialog();
       // You could add success toast here
     } catch (error) {

@@ -56,6 +56,7 @@ import {
   CheckCircle,
   XCircle
 } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 export default function ProductVariantsTable({productVariant, product}) {
   const [variants, setVariants] = useState([]);
@@ -80,6 +81,7 @@ export default function ProductVariantsTable({productVariant, product}) {
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   // Fetch data from APIs
   const fetchVariants = async () => {
@@ -101,10 +103,11 @@ export default function ProductVariantsTable({productVariant, product}) {
     }
   };
 
+  // Sync local state from server props whenever they change
   useEffect(() => {
     fetchVariants();
     fetchProducts();
-  }, []);
+  }, [productVariant, product]);
 
   // Filter and sort variants
   const filteredAndSortedVariants = useMemo(() => {
@@ -240,7 +243,8 @@ export default function ProductVariantsTable({productVariant, product}) {
         throw new Error(errorMessage);
       }
 
-      await fetchVariants(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving product variant:", error);
@@ -261,7 +265,8 @@ export default function ProductVariantsTable({productVariant, product}) {
         throw new Error("Failed to delete product variant");
       }
 
-      await fetchVariants(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
     } catch (error) {
       console.error("Error deleting product variant:", error);
       alert(`Error: ${error.message}`);

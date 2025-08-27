@@ -59,6 +59,7 @@ import {
   X
 } from "lucide-react";
 import { BASE_URL } from "@/utils/api";
+import { useRouter } from 'next/navigation';
 
 export default function CategoryTable({data}) {
   const [categories, setCategories] = useState([]);
@@ -78,6 +79,7 @@ export default function CategoryTable({data}) {
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
   
   // Error state management
   const [error, setError] = useState(null);
@@ -114,9 +116,10 @@ export default function CategoryTable({data}) {
     return flattened;
   };
 
+  // Sync local state from server props whenever data changes
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [data]);
 
   // Filter and sort categories
   const filteredAndSortedCategories = useMemo(() => {
@@ -225,7 +228,8 @@ export default function CategoryTable({data}) {
         throw new Error(errorMessage);
       }
 
-      await fetchCategories(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving category:", error);
@@ -250,7 +254,8 @@ export default function CategoryTable({data}) {
         throw new Error(errorMessage);
       }
 
-      await fetchCategories(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
     } catch (error) {
       console.error("Error deleting category:", error);
       setDeleteError(error.message || "An unexpected error occurred while deleting the category");
@@ -458,7 +463,7 @@ export default function CategoryTable({data}) {
   const handleRetry = () => {
     setError(null);
     setDeleteError(null);
-    fetchCategories();
+    router.refresh();
   };
 
   if (loading) {
