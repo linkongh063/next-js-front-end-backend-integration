@@ -1,36 +1,23 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import prisma  from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import type { Role } from "@prisma/client";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // 1️⃣ Get the signed-in user from Clerk
-  console.log('layout load in dashboard', )
-  const user = await currentUser();
-  console.log('user', user )
-  if (!user) {
-    // Not signed in → redirect to login
-    redirect("/");
+  const session = await auth();
+  const email = (session as any)?.user?.email as string | undefined;
+  const role = (session as any)?.user?.role as Role | undefined;
+  if (!email || role !== "ADMIN") {
+    redirect("/superadmin/sign-in");
   }
-  console.log('user', user)
-  // 2️⃣ Extract the email
-  const email = user.emailAddresses[0]?.emailAddress;
-  console.log("User email:", email);
-
-  // prisma.user.findUnique({
-  //   where: { email },
-  // })
-  // 3️⃣ Check if email exists in your database
-  const dbUser = await prisma.user.findUnique({
-    where: { email },
-  });
-  console.log('db user', dbUser)
-  // 4️⃣ If user not in DB → redirect to login
-  if (!dbUser) {
-    redirect("/");
+  // Ensure the admin exists (optional extra check)
+  const dbUser = await prisma.user.findUnique({ where: { email } });
+  if (!dbUser || dbUser.role !== "ADMIN") {
+    redirect("/superadmin/sign-in");
   }
   return (
     <SidebarProvider>

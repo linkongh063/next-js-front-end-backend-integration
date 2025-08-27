@@ -1,15 +1,7 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { auth, currentUser } from "@clerk/nextjs/server";
+
 export default async function page() {
-
-  const authObj = await auth();
-  const userObj = await currentUser();
-
-  console.log("User Object:", authObj);
-  console.log("Current User:", userObj);
-
+  // Admin access is enforced by app/(admin)/layout.tsx via NextAuth.
   return (
     <div>
       <p className="text-center border py-4">

@@ -25,7 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useClerk } from "@clerk/nextjs";
+import { signOut } from "next-auth/react";
 
 export function NavUser({
   user,
@@ -37,7 +37,6 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const { signOut } = useClerk();
 
   return (
     <SidebarMenu>
@@ -100,12 +99,12 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <div className="border-4">
-                <button onClick={() => signOut({ redirectUrl: "/" })}>
-                  Sign out
-                </button>
-              </div>
+            <DropdownMenuItem
+              onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+              className="cursor-pointer"
+            >
+              <LogOut />
+              Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

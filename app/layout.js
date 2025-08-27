@@ -27,24 +27,9 @@ export default function RootLayout({ children }) {
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {/* <div>
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-16 flex items-center justify-center px-4">
-              <h1 className="text-white text-2xl font-bold">Welcome to ecomx</h1>
-              <div className="flex items-center ml-auto">
-                <Link href="/" className="text-white ml-4">Home</Link>
-                <Link href="/login" className="text-white ml-4">Login</Link>
-                <Link href="/register" className="text-white ml-4">Register</Link>
-                <Link href="/dashboard" className="text-white ml-4">Dashboard</Link>
-                <Link href="/user-profile" className="text-white ml-4">Profile</Link>
-                <div className="px-4">
-                  <UserButton />
-                </div>
-              </div>
-            </div>
-          </div> */}
-          <div className="">
+          <main className="min-h-screen">
             {children}
-          </div>
+          </main>
         </body>
       </html>
     </ClerkProvider>
