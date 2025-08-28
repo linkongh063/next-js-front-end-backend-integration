@@ -17,8 +17,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ShoppingCart, Menu, Search } from "lucide-react";
-import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { ShoppingCart, Menu, Search, User } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useEffect, useMemo, useState } from "react";
 
 const navLinks = [
@@ -152,6 +152,15 @@ export function SiteNavbar() {
                     {l.label}
                   </Link>
                 ))}
+                {/* Signed-in only mobile link */}
+                <SignedIn>
+                  <Link href="/profile" className="py-2 text-base">
+                    Profile
+                  </Link>
+                  <Link href="/orders" className="py-2 text-base">
+                    My Orders
+                  </Link>
+                </SignedIn>
                 {flatRecentCats.length > 0 && (
                   <div className="mt-4">
                     <div className="text-xs uppercase text-gray-500 mb-2">Recent categories</div>
@@ -232,20 +241,27 @@ export function SiteNavbar() {
               </span>
             )}
           </Link>
-          <div className="ml-1">
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton
-                mode="modal"
-                fallbackRedirectUrl="/"
-                forceRedirectUrl={typeof window !== "undefined" ? window.location.href : "/"}
-              >
-                <Button variant="default">Sign in</Button>
-              </SignInButton>
-            </SignedOut>
-          </div>
+          {/* Signed-in actions */}
+          <SignedIn>
+            <Link href="/profile">
+              <Button variant="ghost" size="icon" aria-label="Profile">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+            {/* <Link href="/orders">
+              <Button variant="ghost" className="hidden md:inline-flex">My Orders</Button>
+            </Link> */}
+          </SignedIn>
+          {/* Signed-out action */}
+          <SignedOut>
+            <SignInButton
+              mode="modal"
+              fallbackRedirectUrl="/"
+              forceRedirectUrl={typeof window !== "undefined" ? window.location.href : "/"}
+            >
+              <Button variant="default">Sign in</Button>
+            </SignInButton>
+          </SignedOut>
         </div>
       </div>
     </header>

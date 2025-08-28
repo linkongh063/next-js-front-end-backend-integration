@@ -15,7 +15,15 @@ export default clerkMiddleware(async (auth, req) => {
 export const config = {
   // Run Clerk only for customer area and cart API; exclude admin
   matcher: [
-    "/(customer)(.*)",
+    // Customer-facing pages (route group names like (customer) are NOT in the URL)
+    "/checkout",
+    "/cart",
+    "/orders",
+    "/profile",
+    // Customer APIs that need Clerk
     "/api/cart/:path*",
+    "/api/orders/:path*",
+    "/api/addresses/:path*",
+    "/api/profile",
   ],
 };
