@@ -3,6 +3,9 @@ import prisma  from '@/lib/prisma';
 export const ProductRepository = {
   findAll: () =>
     prisma.product.findMany({
+      where:{
+        status: 'ACTIVE'
+      },
       include: {
         brand: true,
         category: true,
