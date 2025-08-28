@@ -33,9 +33,9 @@ const data = {
   },
   teams: [
     {
-      name: "Ecom BD",
+      name: "ECOMX",
       logo: PieChart,
-      plan: "Pro",
+      plan: "Standard",
     },
     {
       name: "Warehouse Unit",
