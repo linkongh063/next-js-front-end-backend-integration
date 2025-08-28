@@ -61,6 +61,7 @@ import { useRouter } from 'next/navigation';
 export default function ProductVariantsTable({productVariant, product}) {
   const [variants, setVariants] = useState([]);
   const [products, setProducts] = useState([]);
+  const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [productFilter, setProductFilter] = useState("all");
@@ -77,7 +78,8 @@ export default function ProductVariantsTable({productVariant, product}) {
     cost: "",
     stockQuantity: "",
     stockAlertThreshold: "5",
-    isDefault: false
+    isDefault: false,
+    attributeValueIds: [],
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,10 +105,22 @@ export default function ProductVariantsTable({productVariant, product}) {
     }
   };
 
+  const fetchAttributes = async () => {
+    try {
+      const res = await fetch('/api/attributes', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to load attributes');
+      const data = await res.json();
+      setAttributes(data || []);
+    } catch (err) {
+      console.error('Error fetching attributes:', err);
+    }
+  };
+
   // Sync local state from server props whenever they change
   useEffect(() => {
     fetchVariants();
     fetchProducts();
+    fetchAttributes();
   }, [productVariant, product]);
 
   // Filter and sort variants
@@ -234,6 +248,7 @@ export default function ProductVariantsTable({productVariant, product}) {
           cost: formData.cost ? parseFloat(formData.cost) : null,
           stockQuantity: parseInt(formData.stockQuantity),
           stockAlertThreshold: parseInt(formData.stockAlertThreshold),
+          attributeValueIds: formData.attributeValueIds,
         }),
       });
 
@@ -282,7 +297,8 @@ export default function ProductVariantsTable({productVariant, product}) {
       cost: "",
       stockQuantity: "",
       stockAlertThreshold: "5",
-      isDefault: false
+      isDefault: false,
+      attributeValueIds: [],
     });
     setFormErrors({});
     setEditingVariant(null);
@@ -297,7 +313,10 @@ export default function ProductVariantsTable({productVariant, product}) {
       cost: variant.cost ? variant.cost.toString() : "",
       stockQuantity: variant.stockQuantity.toString(),
       stockAlertThreshold: variant.stockAlertThreshold.toString(),
-      isDefault: variant.isDefault
+      isDefault: variant.isDefault,
+      attributeValueIds: Array.isArray(variant.attributes)
+        ? variant.attributes.map((a) => a.attributeValueId)
+        : [],
     });
     setFormErrors({});
     setEditingVariant(variant);
@@ -315,7 +334,8 @@ export default function ProductVariantsTable({productVariant, product}) {
       cost: "",
       stockQuantity: "",
       stockAlertThreshold: "5",
-      isDefault: false
+      isDefault: false,
+      attributeValueIds: [],
     });
     setFormErrors({});
   };
@@ -328,6 +348,14 @@ export default function ProductVariantsTable({productVariant, product}) {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const toggleAttributeValue = (valueId) => {
+    setFormData((prev) => {
+      const set = new Set(prev.attributeValueIds || []);
+      if (set.has(valueId)) set.delete(valueId); else set.add(valueId);
+      return { ...prev, attributeValueIds: Array.from(set) };
+    });
   };
 
   const getSortIcon = (field) => {
@@ -745,6 +773,31 @@ export default function ProductVariantsTable({productVariant, product}) {
                 )}
               </div>
             </div>
+            {!!attributes.length && (
+              <div className="space-y-3">
+                <Label>Attributes</Label>
+                <div className="space-y-2">
+                  {attributes.map((attr) => (
+                    <div key={attr.id} className="border rounded-md p-3">
+                      <div className="font-medium mb-2">{attr.name}</div>
+                      <div className="flex flex-wrap gap-3">
+                        {attr.values?.map((val) => (
+                          <label key={val.id} className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300"
+                              checked={formData.attributeValueIds?.includes(val.id)}
+                              onChange={() => toggleAttributeValue(val.id)}
+                            />
+                            <span>{val.value}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -874,6 +927,31 @@ export default function ProductVariantsTable({productVariant, product}) {
                 )}
               </div>
             </div>
+            {!!attributes.length && (
+              <div className="space-y-3">
+                <Label>Attributes</Label>
+                <div className="space-y-2">
+                  {attributes.map((attr) => (
+                    <div key={attr.id} className="border rounded-md p-3">
+                      <div className="font-medium mb-2">{attr.name}</div>
+                      <div className="flex flex-wrap gap-3">
+                        {attr.values?.map((val) => (
+                          <label key={val.id} className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300"
+                              checked={formData.attributeValueIds?.includes(val.id)}
+                              onChange={() => toggleAttributeValue(val.id)}
+                            />
+                            <span>{val.value}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -898,3 +976,4 @@ export default function ProductVariantsTable({productVariant, product}) {
     </div>
   );
 }
+
