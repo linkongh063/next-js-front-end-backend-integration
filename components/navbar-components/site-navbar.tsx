@@ -22,7 +22,6 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useEffect, useMemo, useState } from "react";
 
 const navLinks = [
-  { href: "/", label: "Home" },
   { href: "/shop", label: "Shops" },
 ];
 
@@ -71,6 +70,7 @@ export function SiteNavbar() {
       try {
         const res = await fetch("/api/category", { cache: "no-store" });
         const data = await res.json();
+        console.log("category data", data)
         if (!active) return;
         const arr = Array.isArray(data) ? data : [];
         setCats(arr);
@@ -121,17 +121,17 @@ export function SiteNavbar() {
     return () => window.removeEventListener("cart:updated", handler as EventListener);
   }, []);
 
-  const flatRecentCats = useMemo(() => {
-    const out: any[] = [];
-    const walk = (arr: any[]) => {
-      arr.forEach((c) => {
-        out.push(c);
-        if (c.children?.length) walk(c.children);
-      });
-    };
-    walk(cats || []);
-    return out.slice(0, 3);
-  }, [cats]);
+  // const flatRecentCats = useMemo(() => {
+  //   const out: any[] = [];
+  //   const walk = (arr: any[]) => {
+  //     arr.forEach((c) => {
+  //       out.push(c);
+  //       if (c.children?.length) walk(c.children);
+  //     });
+  //   };
+  //   walk(cats || []);
+  //   return out.slice(0, 3);
+  // }, [cats]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
@@ -161,7 +161,7 @@ export function SiteNavbar() {
                     My Orders
                   </Link>
                 </SignedIn>
-                {flatRecentCats.length > 0 && (
+                {/* {flatRecentCats.length > 0 && (
                   <div className="mt-4">
                     <div className="text-xs uppercase text-gray-500 mb-2">Recent categories</div>
                     <div className="grid gap-1">
@@ -172,13 +172,13 @@ export function SiteNavbar() {
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </nav>
             </SheetContent>
           </Sheet>
 
           <Link href="/" className="font-semibold text-xl">
-            ecomx
+            ECOMX
           </Link>
 
           <NavigationMenu className="hidden md:flex">
@@ -199,7 +199,7 @@ export function SiteNavbar() {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
-              {flatRecentCats.map((c) => (
+              {cats.map((c) => (
                 <NavigationMenuItem key={`rc-${c.id}`}>
                   <NavigationMenuLink asChild>
                     <Link
