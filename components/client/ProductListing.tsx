@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import noProductImage from "@/public/no-product-img.jpg"
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 type Product = any;
 
 export default function ProductListing({
@@ -36,6 +38,11 @@ export default function ProductListing({
   showPagination?: boolean;
   showFilters?: boolean;
 }) {
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlCategoryId = searchParams.get("category") || "all";
+
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState<string | "all">(
     initialCategoryId as any
@@ -48,10 +55,10 @@ export default function ProductListing({
   const pageSize = 12;
 
   // Sync category state when initialCategoryId changes (e.g., from URL changes)
-  useEffect(() => {
-    setCategoryId((initialCategoryId as any) ?? "all");
+   useEffect(() => {
+    setCategoryId(urlCategoryId);
     setPage(1);
-  }, [initialCategoryId]);
+  }, [urlCategoryId]);
 
   const filtered = useMemo(() => {
     const min = minPrice ? parseFloat(minPrice) : undefined;

@@ -131,7 +131,7 @@ export default async function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {categoriesFlat &&
                 categoriesFlat.slice(0, 6).map((category) => (
-                  <Link key={category.id} href={`/shop`}>
+                  <Link key={category.id} href={`/shop?category=${category.id}`}>
                     <Card
                       className={`group relative overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-lg ${
                         category.level === 0 ? "bg-gray-50" : "bg-white"
