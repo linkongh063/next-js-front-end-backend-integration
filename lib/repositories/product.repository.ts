@@ -11,7 +11,7 @@ export const ProductRepository = {
       include: {
         brand: true,
         category: true,
-        // variants: true,
+        variants: true,
         images: true,
       },
     })

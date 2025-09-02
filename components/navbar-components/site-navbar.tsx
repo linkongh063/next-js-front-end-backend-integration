@@ -4,32 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ShoppingCart, Menu, Search, User } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { useEffect, useMemo, useState } from "react";
-
-const navLinks = [
-  { href: "/shop", label: "Shops" },
-];
+import { useEffect, useState } from "react";
 
 export function SiteNavbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const [cats, setCats] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState<number>(0);
 
+  // ✅ Fetch categories with caching
   useEffect(() => {
     let active = true;
     const CACHE_KEY = "navCatsCache_v1";
@@ -40,8 +25,7 @@ export function SiteNavbar() {
         const raw = localStorage.getItem(CACHE_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") return null;
-        const { updatedAt, data } = parsed as { updatedAt: number; data: any[] };
+        const { updatedAt, data } = parsed;
         if (!updatedAt || !Array.isArray(data)) return null;
         if (Date.now() - updatedAt > DAY_MS) return null; // expired
         return data;
@@ -56,9 +40,7 @@ export function SiteNavbar() {
           CACHE_KEY,
           JSON.stringify({ updatedAt: Date.now(), data })
         );
-      } catch {
-        // ignore quota or serialization issues
-      }
+      } catch {}
     };
 
     (async () => {
@@ -70,7 +52,6 @@ export function SiteNavbar() {
       try {
         const res = await fetch("/api/category", { cache: "no-store" });
         const data = await res.json();
-        console.log("category data", data)
         if (!active) return;
         const arr = Array.isArray(data) ? data : [];
         setCats(arr);
@@ -85,7 +66,7 @@ export function SiteNavbar() {
     };
   }, []);
 
-  // load cart count
+  // ✅ Fetch cart count
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -95,7 +76,10 @@ export function SiteNavbar() {
         const data = await res.json();
         if (!cancelled) {
           const items = Array.isArray(data?.items) ? data.items : [];
-          const totalQty = items.reduce((s: number, it: any) => s + (Number(it.quantity) || 0), 0);
+          const totalQty = items.reduce(
+            (s: number, it: any) => s + (Number(it.quantity) || 0),
+            0
+          );
           setCartCount(totalQty);
         }
       } catch {}
@@ -105,7 +89,7 @@ export function SiteNavbar() {
     };
   }, [pathname]);
 
-  // react to cart updates globally
+  // ✅ React to global cart updates
   useEffect(() => {
     const handler = async () => {
       try {
@@ -113,157 +97,189 @@ export function SiteNavbar() {
         if (!res.ok) return;
         const data = await res.json();
         const items = Array.isArray(data?.items) ? data.items : [];
-        const totalQty = items.reduce((s: number, it: any) => s + (Number(it.quantity) || 0), 0);
+        const totalQty = items.reduce(
+          (s: number, it: any) => s + (Number(it.quantity) || 0),
+          0
+        );
         setCartCount(totalQty);
       } catch {}
     };
     window.addEventListener("cart:updated", handler as EventListener);
-    return () => window.removeEventListener("cart:updated", handler as EventListener);
+    return () =>
+      window.removeEventListener("cart:updated", handler as EventListener);
   }, []);
 
-  // const flatRecentCats = useMemo(() => {
-  //   const out: any[] = [];
-  //   const walk = (arr: any[]) => {
-  //     arr.forEach((c) => {
-  //       out.push(c);
-  //       if (c.children?.length) walk(c.children);
-  //     });
-  //   };
-  //   walk(cats || []);
-  //   return out.slice(0, 3);
-  // }, [cats]);
-
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Left: Logo + Desktop Nav */}
-        <div className="flex items-center gap-4">
-          <Sheet>
-            <SheetTrigger className="md:hidden p-2" aria-label="Open menu">
-              <Menu className="h-6 w-6" />
-            </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <nav className="mt-4 grid gap-2">
-                {navLinks.map((l) => (
-                  <Link key={l.href} href={l.href} className="py-2 text-base">
-                    {l.label}
-                  </Link>
-                ))}
-                {/* Signed-in only mobile link */}
-                <SignedIn>
-                  <Link href="/profile" className="py-2 text-base">
-                    Profile
-                  </Link>
-                  <Link href="/orders" className="py-2 text-base">
-                    My Orders
-                  </Link>
-                </SignedIn>
-                {/* {flatRecentCats.length > 0 && (
-                  <div className="mt-4">
-                    <div className="text-xs uppercase text-gray-500 mb-2">Recent categories</div>
-                    <div className="grid gap-1">
-                      {flatRecentCats.map((c) => (
-                        <Link key={c.id} href={`/shop?category=${c.id}`} className="py-1 text-sm">
-                          {c.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )} */}
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          <Link href="/" className="font-semibold text-xl">
-            ECOMX
-          </Link>
-
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-              {navLinks.map((l) => (
-                <NavigationMenuItem key={l.href}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={l.href}
-                      className={`px-3 py-2 rounded-md text-sm transition-colors ${
-                        pathname === l.href
-                          ? "bg-gray-900 text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      {l.label}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-              {cats.map((c) => (
-                <NavigationMenuItem key={`rc-${c.id}`}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={`/shop?category=${c.id}`}
-                      className={`px-3 py-2 rounded-md text-sm transition-colors ${
-                        pathname.startsWith("/shop") ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                      title={c.name}
-                    >
-                      {c.name}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-
-        {/* Middle: Search */}
-        <div className="hidden md:flex items-center gap-2 max-w-md w-full">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input placeholder="Search products" className="pl-9" />
-          </div>
-          <Button variant="default">Search</Button>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          <Link href="/cart" className="relative">
-            <Button asChild variant="ghost" size="icon" aria-label="Cart">
-              <span>
-                <ShoppingCart className="h-5 w-5" />
-              </span>
-            </Button>
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] h-4 min-w-4 px-1">
-                {cartCount}
-              </span>
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Mobile menu button */}
+        <div className="flex items-center lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="mr-2"
+          >
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
             )}
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+          <Link href="/" className="flex items-center">
+            <span className="text-xl font-bold">Ecomx</span>
           </Link>
-          {/* Signed-in actions */}
+        </div>
+
+        {/* Desktop logo */}
+        <div className="hidden lg:flex lg:flex-1">
+          <Link href="/" className="flex items-center">
+            <span className="text-xl font-bold">Ecomx</span>
+          </Link>
+        </div>
+
+        {/* Navigation links - Desktop */}
+        <nav className="hidden lg:flex lg:flex-1 lg:justify-center">
+          <ul className="flex items-center space-x-8">
+            <li>
+              <Link
+                href="/shop"
+                className="text-sm font-medium hover:text-gray-600"
+              >
+                Shop
+              </Link>
+            </li>
+            {/* {cats.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/shop?category=${c.id}`}
+                  className="text-sm font-medium hover:text-gray-600"
+                >
+                  {c.name}
+                </Link>
+              </li>
+            ))} */}
+            <li>
+              <Link
+                href="/new-arrivals"
+                className="text-sm font-medium hover:text-gray-600"
+              >
+                New Arrivals
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/sale"
+                className="text-sm font-medium hover:text-gray-600"
+              >
+                Sale
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Search and actions */}
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          {/* Search bar - Desktop */}
+          <div className="hidden lg:block w-full max-w-xs">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                className="w-full rounded-full bg-gray-100 pl-10 focus-visible:ring-1 focus-visible:ring-gray-400"
+              />
+            </div>
+          </div>
+
+          {/* Search button - Mobile */}
+          <Button variant="ghost" size="icon" className="lg:hidden">
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Search</span>
+          </Button>
+
+          {/* User account */}
           <SignedIn>
-            <Link href="/profile">
-              <Button variant="ghost" size="icon" aria-label="Profile">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/profile">
                 <User className="h-5 w-5" />
-              </Button>
-            </Link>
-            {/* <Link href="/orders">
-              <Button variant="ghost" className="hidden md:inline-flex">My Orders</Button>
-            </Link> */}
+                <span className="sr-only">Account</span>
+              </Link>
+            </Button>
           </SignedIn>
-          {/* Signed-out action */}
           <SignedOut>
-            <SignInButton
-              mode="modal"
-              fallbackRedirectUrl="/"
-              forceRedirectUrl={typeof window !== "undefined" ? window.location.href : "/"}
-            >
-              <Button variant="default">Sign in</Button>
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Sign in</span>
+              </Button>
             </SignInButton>
           </SignedOut>
+
+          {/* Cart */}
+          <Button variant="ghost" size="icon" className="relative" asChild>
+            <Link href="/cart">
+              <ShoppingBag className="h-5 w-5" />
+              <span className="sr-only">Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </Button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden">
+          <div className="space-y-1 border-t px-4 py-3">
+            <Link
+              href="/shop"
+              className="block py-2 text-sm font-medium hover:text-gray-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Shop
+            </Link>
+            {/* {cats.map((c) => (
+              <Link
+                key={c.id}
+                href={`/shop?category=${c.id}`}
+                className="block py-2 text-sm font-medium hover:text-gray-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {c.name}
+              </Link>
+            ))} */}
+            <Link
+              href="/new-arrivals"
+              className="block py-2 text-sm font-medium hover:text-gray-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              New Arrivals
+            </Link>
+            <Link
+              href="/sale"
+              className="block py-2 text-sm font-medium hover:text-gray-600"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sale
+            </Link>
+          </div>
+          <div className="border-t px-4 py-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                className="w-full rounded-full bg-gray-100 pl-10 focus-visible:ring-1 focus-visible:ring-gray-400"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
