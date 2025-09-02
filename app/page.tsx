@@ -184,12 +184,11 @@ export default async function Home() {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               Up to 50% off on selected items. Limited time offer!
             </p>
-            <Button
-              variant="outline"
-              className="border-white text-white hover:bg-white/10"
-            >
-              Shop the Sale
-            </Button>
+            <Link href="/shop">
+              <Button variant="outline" className="border-white text-black cursor-pointer">
+                Shop the Sale
+              </Button>
+            </Link>
           </div>
         </section>
 
@@ -222,13 +221,13 @@ export default async function Home() {
             <p className="text-gray-600 mb-8">
               Get the latest updates on new products and upcoming sales
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
               />
-              <Button className="px-8 py-3">Subscribe</Button>
+              <Button className="px-8 py-4 cursor-pointer h-full">Subscribe</Button>
             </div>
           </div>
         </section>

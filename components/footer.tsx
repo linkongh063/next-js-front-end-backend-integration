@@ -44,7 +44,7 @@ const Footer = () => {
               <Truck className="h-8 w-8 text-gray-400" />
               <div>
                 <h3 className="font-medium">Free Shipping</h3>
-                <p className="text-sm text-gray-400">On orders over $50</p>
+                <p className="text-sm text-gray-400">On orders over 50TK</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -70,7 +70,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Logo and Description */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-4">LOGO</h2>
+            <h2 className="text-2xl font-bold mb-4">EcomX</h2>
             <p className="text-gray-400 mb-6">
               Discover the latest trends in fashion, electronics, and more. Quality products at affordable prices.
             </p>
