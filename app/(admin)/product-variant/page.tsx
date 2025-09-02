@@ -1,14 +1,18 @@
 // app/admin/product-variants/page.tsx
 
 import ProductVariantPage from "@/containers/admin/product-variants/ProductVariantTable";
+import { BASE_URL } from "@/utils/api";
 
 export default async function ProductVariantsPage() {
   const [productVariantsRes, productsRes] = await Promise.all([
-    fetch(`/api/product-variants`, { cache: "no-store" }),
-    fetch(`/api/products`, { cache: "no-store" }),
+    fetch(`${BASE_URL}/product-variants`, { cache: "no-store" }),
+    fetch(`${BASE_URL}/products`, { cache: "no-store" }),
   ]);
-
-  if (!productVariantsRes.ok || !productsRes.ok) {
+  console.log('error',  productsRes)
+  if (
+    !productVariantsRes.ok ||
+    !productsRes.ok
+      ) {
     console.error("API fetch error", {
       productVariants: productVariantsRes.statusText,
       products: productsRes.statusText,

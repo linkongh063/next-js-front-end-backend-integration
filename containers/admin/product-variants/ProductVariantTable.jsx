@@ -83,6 +83,16 @@ export default function ProductVariantsTable({productVariant, product}) {
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
+  const [adjustingVariant, setAdjustingVariant] = useState(null);
+  const [adjustQty, setAdjustQty] = useState(0);
+  const [adjustReason, setAdjustReason] = useState('MANUAL');
+  const [adjustNote, setAdjustNote] = useState('');
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyVariant, setHistoryVariant] = useState(null);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const router = useRouter();
 
   // Fetch data from APIs
@@ -285,6 +295,64 @@ export default function ProductVariantsTable({productVariant, product}) {
     } catch (error) {
       console.error("Error deleting product variant:", error);
       alert(`Error: ${error.message}`);
+    }
+  };
+
+  // Inventory: open adjust dialog
+  const openAdjustDialog = (variant) => {
+    setAdjustingVariant(variant);
+    setAdjustQty(0);
+    setAdjustReason('MANUAL');
+    setAdjustNote('');
+    setIsAdjustDialogOpen(true);
+  };
+
+  // Inventory: submit adjust
+  const submitAdjust = async (e) => {
+    e?.preventDefault?.();
+    if (!adjustingVariant) return;
+    if (!Number.isInteger(Number(adjustQty))) {
+      alert('Quantity change must be an integer');
+      return;
+    }
+    setIsAdjusting(true);
+    try {
+      const res = await fetch('/api/inventory/adjust', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variantId: adjustingVariant.id,
+          change: Number(adjustQty),
+          reason: adjustReason,
+          note: adjustNote || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || 'Failed to adjust inventory');
+      setIsAdjustDialogOpen(false);
+      setAdjustingVariant(null);
+      router.refresh();
+    } catch (err) {
+      alert(err?.message || 'Adjustment failed');
+    } finally {
+      setIsAdjusting(false);
+    }
+  };
+
+  // Inventory: open history dialog
+  const openHistoryDialog = async (variant) => {
+    setHistoryVariant(variant);
+    setIsHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/inventory/logs?variantId=${variant.id}`);
+      const data = await res.json();
+      setHistoryItems(data?.items || []);
+    } catch (e) {
+      console.error('Failed to load history', e);
+      setHistoryItems([]);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -631,6 +699,22 @@ export default function ProductVariantsTable({productVariant, product}) {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openAdjustDialog(variant)}
+                            title="Adjust stock"
+                          >
+                            <Package className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openHistoryDialog(variant)}
+                            title="Inventory history"
+                          >
+                            <ArrowUpDown className="h-4 w-4" />
+                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="outline" size="sm">
@@ -973,7 +1057,88 @@ export default function ProductVariantsTable({productVariant, product}) {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Adjust Stock Dialog */}
+      <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adjust Stock</DialogTitle>
+            <DialogDescription>
+              Increase or decrease stock for SKU {adjustingVariant?.sku}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitAdjust} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="adjustQty">Change Quantity</Label>
+              <Input
+                id="adjustQty"
+                type="number"
+                step="1"
+                value={adjustQty}
+                onChange={(e) => setAdjustQty(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">Use negative numbers to reduce stock.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason</Label>
+              <Select value={adjustReason} onValueChange={setAdjustReason}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="RESTOCK">Restock</SelectItem>
+                  <SelectItem value="RETURN">Return</SelectItem>
+                  <SelectItem value="CORRECTION">Correction</SelectItem>
+                  <SelectItem value="MANUAL">Manual</SelectItem>
+                  <SelectItem value="SALE">Sale</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adjustNote">Note (optional)</Label>
+              <Input id="adjustNote" value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isAdjusting}>{isAdjusting ? 'Applying...' : 'Apply'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Inventory History Dialog */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Inventory History</DialogTitle>
+            <DialogDescription>
+              Recent inventory changes for SKU {historyVariant?.sku}
+            </DialogDescription>
+          </DialogHeader>
+          {historyLoading ? (
+            <div className="py-6"><Skeleton className="h-6 w-full" /></div>
+          ) : (
+            <div className="space-y-3 max-h-80 overflow-auto">
+              {historyItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No history found.</p>
+              ) : (
+                historyItems.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between border rounded p-2">
+                    <div className="text-sm">
+                      <div className="font-medium">{log.reason} {log.change > 0 ? '+' : ''}{log.change}</div>
+                      {log.note && <div className="text-muted-foreground">{log.note}</div>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleString()}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsHistoryOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-

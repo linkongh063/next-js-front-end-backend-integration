@@ -7,6 +7,22 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(item);
 }
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const { value } = await req.json();
+  console.log('id', id)
+  console.log('value', value)
+  
+  if (!value?.trim()) return NextResponse.json({ error: "Value is required" }, { status: 400 });
+
+  try {
+    const updated = await AttributeService.addValue(id, value.trim());
+    return NextResponse.json(updated);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
+  }
+}
+
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

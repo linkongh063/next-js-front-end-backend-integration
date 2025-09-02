@@ -13,7 +13,10 @@ export const AttributeRepository = {
       include: { values: true },
     }),
 
-  create: (data: any) => prisma.attribute.create({ data }),
+  create: (data: any) => {
+    console.log('data',data)
+    return prisma.attribute.create({ data })
+  },
 
   update: (id: string, data: any) =>
     prisma.attribute.update({ where: { id }, data }),

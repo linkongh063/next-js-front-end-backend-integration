@@ -5,6 +5,7 @@ export const ProductVariantRepository = {
     const variants = await prisma.productVariant.findMany({
       include: { product: true },
     });
+    console.log('variants',variants);
     const ids = variants.map(v => v.id);
     if (ids.length === 0) return variants.map(v => ({ ...v, attributes: [] }));
     const links = await prisma.productVariantAttribute.findMany({
@@ -33,12 +34,30 @@ export const ProductVariantRepository = {
 
   create: async (data: any) => {
     const { attributeValueIds, ...variantData } = data || {};
-    const created = await prisma.productVariant.create({ data: variantData, include: { product: true } });
-    if (Array.isArray(attributeValueIds) && attributeValueIds.length) {
-      await prisma.productVariantAttribute.createMany({
-        data: attributeValueIds.map((valueId: string) => ({ variantId: created.id, attributeValueId: valueId })),
-      });
-    }
+    // Ensure productId and sku are present
+    if (!variantData?.productId) throw new Error('productId is required');
+    if (!variantData?.sku) throw new Error('sku is required');
+
+    const created = await prisma.$transaction(async (tx) => {
+      const v = await tx.productVariant.create({ data: variantData, include: { product: true } });
+
+      if (Array.isArray(attributeValueIds) && attributeValueIds.length) {
+        await tx.productVariantAttribute.createMany({
+          data: attributeValueIds.map((valueId: string) => ({ variantId: v.id, attributeValueId: valueId })),
+        });
+      }
+
+      // If this is set as default, unset others for the same product
+      if (variantData?.isDefault) {
+        await tx.productVariant.updateMany({
+          where: { productId: v.productId, id: { not: v.id } },
+          data: { isDefault: false },
+        });
+      }
+
+      return v;
+    });
+
     const attrs = await prisma.productVariantAttribute.findMany({
       where: { variantId: created.id },
       include: { attributeValue: { include: { attribute: true } } },
@@ -48,15 +67,30 @@ export const ProductVariantRepository = {
 
   update: async (id: string, data: any) => {
     const { attributeValueIds, ...variantData } = data || {};
-    const updated = await prisma.productVariant.update({ where: { id }, data: variantData, include: { product: true } });
-    if (Array.isArray(attributeValueIds)) {
-      await prisma.productVariantAttribute.deleteMany({ where: { variantId: id } });
-      if (attributeValueIds.length) {
-        await prisma.productVariantAttribute.createMany({
-          data: attributeValueIds.map((valueId: string) => ({ variantId: id, attributeValueId: valueId })),
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const v = await tx.productVariant.update({ where: { id }, data: variantData, include: { product: true } });
+
+      if (Array.isArray(attributeValueIds)) {
+        await tx.productVariantAttribute.deleteMany({ where: { variantId: id } });
+        if (attributeValueIds.length) {
+          await tx.productVariantAttribute.createMany({
+            data: attributeValueIds.map((valueId: string) => ({ variantId: id, attributeValueId: valueId })),
+          });
+        }
+      }
+
+      // If now default, unset others for the same product
+      if (variantData?.isDefault) {
+        await tx.productVariant.updateMany({
+          where: { productId: v.productId, id: { not: v.id } },
+          data: { isDefault: false },
         });
       }
-    }
+
+      return v;
+    });
+
     const attrs = await prisma.productVariantAttribute.findMany({
       where: { variantId: id },
       include: { attributeValue: { include: { attribute: true } } },
@@ -69,4 +103,3 @@ export const ProductVariantRepository = {
       where: { id },
     }),
 };
-

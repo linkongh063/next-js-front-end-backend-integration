@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const products = await ProductService.getProducts();
+  console.log('products from controller',products)
   return NextResponse.json(products);
 }
 

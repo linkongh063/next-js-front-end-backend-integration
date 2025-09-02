@@ -1,17 +1,17 @@
 import { ProductVariantService } from '@/lib/services/product-variant.service';
 import { NextResponse } from 'next/server';
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
   const variant = await ProductVariantService.getVariantById(id);
   return variant
     ? NextResponse.json(variant)
     : NextResponse.json({ error: 'Variant not found' }, { status: 404 });
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await req.json();
     const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
@@ -24,9 +24,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await req.json();
     const updated = await ProductVariantService.updateVariant(id, body);
     return NextResponse.json(updated);
@@ -39,9 +39,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await ProductVariantService.deleteVariant(id);
     return NextResponse.json({ message: 'Deleted' });
   } catch (error: any) {

@@ -88,6 +88,10 @@ const data = {
           url: "/product-variant",
         },
         {
+          title: "Variant Manager",
+          url: "/product-variant-manager",
+        },
+        {
           title: "Categories",
           url: "/categories",
         },

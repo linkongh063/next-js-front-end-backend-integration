@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
     try {
+        console.log('Fetching product variants...');
         const variants = await ProductVariantService.getVariants();
         return NextResponse.json(variants);
     } catch (error: any) {
