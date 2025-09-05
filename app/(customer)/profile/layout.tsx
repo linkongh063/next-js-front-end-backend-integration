@@ -1,11 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-
-// import { logout } from "@/app/actions/logout";
-import { signOut } from "@/auth";
-
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default function ProfileLayout({
   children,
@@ -19,13 +15,7 @@ export default function ProfileLayout({
     <div className="max-w-6xl mx-auto py-10 px-4">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold">My Profile</h1>
-        {/* <SignOutButton> */}
-        <Button onClick={ async() => await signOut({
-          redirectTo: '/'
-        })} variant="outline" className="cursor-pointer">
-          Sign out 00
-        </Button>
-        {/* </SignOutButton> */}
+        <SignOutButton />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
