@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
+// import { currentUser } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const cuser = await auth();
+    console.log('cuser', cuser)
+    const email = cuser?.user?.email;
+    console.log('email', email)
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const user = await prisma.user.upsert({

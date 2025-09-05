@@ -52,6 +52,18 @@ const featuredProducts = [
   },
 ];
 
+// --- Normalizer utility ---
+function normalizeProducts(products: any[]): any[] {
+  return products.map((product) => ({
+    ...product,
+    variants: product.variants.map((variant: any) => ({
+      ...variant,
+      price: Number(variant.price), // Prisma Decimal → number
+      cost: variant.cost !== null ? Number(variant.cost) : null,
+    })),
+  }))
+}
+
 export default async function Home() {
   // Fetch data on the server
   const [products, categories] = await Promise.all([
@@ -83,9 +95,9 @@ export default async function Home() {
     }));
 
   const displayProducts =
-    products?.length > 0 ? products.slice(0, 4) : featuredProducts;
+    products?.length > 0 ? normalizeProducts(products.slice(0, 4)) : featuredProducts;
 
-  console.log("products", products);
+  // console.log("products", products);
   return (
     <div className="min-h-screen flex flex-col">
       <SiteNavbar />

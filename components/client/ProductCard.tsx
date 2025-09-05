@@ -54,7 +54,7 @@ export default function ProductCard({ product }: { product: ApiProduct }) {
   const price = defaultVariant ? parseFloat(defaultVariant.price) : 0;
   //   const defaultVariant = product.variants?.find((v: any) => v.isDefault) || product.variants?.[0];
   const isOutOfStock = defaultVariant?.stockQuantity <= 0;
-  console.log("isOutOfStock", isOutOfStock);
+  // console.log("isOutOfStock", isOutOfStock);
   // Example original price (for demo)
   const originalPrice = price > 0 ? price + 100 : undefined;
 

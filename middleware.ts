@@ -1,29 +1,28 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 
-// Customer-only protection (if you want to protect some customer pages later)
-const isProtectedCustomerRoute = createRouteMatcher([
-  // e.g., add protected customer pages here
-]);
+export default auth(async function middleware(req: NextRequest) {
+  const { nextUrl } = req
+  const pathname = nextUrl.pathname
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedCustomerRoute(req)) {
-    const { userId, redirectToSignIn } = await auth();
-    if (!userId) return redirectToSignIn({ returnBackUrl: req.url });
+  console.log("middleware called")
+  console.log("auth object:", req.auth)
+
+  // Protect /cart and /profile
+  if (!req.auth && ["/cart", "/profile"].some((r) => pathname.startsWith(r))) {
+    return NextResponse.redirect(new URL("/sign-in", req.url))
   }
-});
+
+  // Protect /admin (only admins allowed)
+  if (pathname.startsWith("/admin")) {
+    if (!req.auth || req.auth.user?.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", req.url))
+    }
+  }
+
+  return NextResponse.next()
+})
 
 export const config = {
-  // Run Clerk only for customer area and cart API; exclude admin
-  matcher: [
-    // Customer-facing pages (route group names like (customer) are NOT in the URL)
-    "/checkout",
-    "/cart",
-    "/orders",
-    "/profile",
-    // Customer APIs that need Clerk
-    "/api/cart/:path*",
-    "/api/orders/:path*",
-    "/api/addresses/:path*",
-    "/api/profile",
-  ],
-};
+  matcher: ["/cart/:path*", "/profile/:path*", "/admin/:path*"],
+}

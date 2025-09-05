@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
 export function SiteNavbar() {
@@ -200,22 +199,13 @@ export function SiteNavbar() {
           </Button>
 
           {/* User account */}
-          <SignedIn>
+          hello
             <Button variant="ghost" size="icon" asChild>
               <Link href="/profile">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Account</span>
               </Link>
             </Button>
-          </SignedIn>
-          <SignedOut>
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Sign in</span>
-              </Button>
-            </SignInButton>
-          </SignedOut>
 
           {/* Cart */}
           <Button variant="ghost" size="icon" className="relative" asChild>

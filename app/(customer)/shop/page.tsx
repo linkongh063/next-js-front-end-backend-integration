@@ -8,8 +8,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: { c
     CategoryService.getAllCategories(),
   ]);
 
-  console.log("products", products);
-  console.log("categories", categories);
+  // console.log("products", products);
+  // console.log("categories", categories);
   // Convert Prisma Decimal and other non-plain values to plain JS before passing to Client Component
   const normalizeProducts = (items: any[]) =>
     (items || []).map((p) => ({

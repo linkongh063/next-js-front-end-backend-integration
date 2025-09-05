@@ -13,7 +13,9 @@ export default function ProfileInfoPage() {
     (async () => {
       try {
         setLoading(true);
+        console.log('hello profile page')
         const res = await fetch("/api/profile", { cache: "no-store" });
+        console.log('res from profile page', res)
         if (res.status === 401) {
           if (typeof window !== "undefined") {
             const cb = encodeURIComponent("/profile/profileinfo");
@@ -32,6 +34,7 @@ export default function ProfileInfoPage() {
           });
         }
       } catch (e: any) {
+        console.log('error', e.message)
         if (!cancelled) setError(e?.message || "Something went wrong");
       } finally {
         if (!cancelled) setLoading(false);

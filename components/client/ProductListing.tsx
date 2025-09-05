@@ -40,7 +40,7 @@ export default function ProductListing({
 }) {
 
   const searchParams = useSearchParams();
-  const router = useRouter();
+
   const urlCategoryId = searchParams.get("category") || "all";
 
   const [query, setQuery] = useState("");
