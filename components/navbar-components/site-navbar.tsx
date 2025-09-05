@@ -6,12 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { auth } from "@/auth";
 
 export function SiteNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const [cats, setCats] = useState<any[]>([]);
   const [cartCount, setCartCount] = useState<number>(0);
+  
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const session = await auth();
+      setCurrentUser(session?.user ?? null);
+    };
+    getUser();
+  }, []);
 
   // ✅ Fetch categories with caching
   useEffect(() => {
@@ -199,13 +210,13 @@ export function SiteNavbar() {
           </Button>
 
           {/* User account */}
-          hello
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/profile">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Account</span>
-              </Link>
-            </Button>
+          <span>{currentUser?.name ? currentUser.name : "default user"}</span>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/profile/profileinfo">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Account</span>
+            </Link>
+          </Button>
 
           {/* Cart */}
           <Button variant="ghost" size="icon" className="relative" asChild>

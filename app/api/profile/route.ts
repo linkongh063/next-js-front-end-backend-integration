@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 export async function GET() {
   try {
     const cuser = await auth();
-    console.log('cuser', cuser)
+    console.log('cuser from profile', cuser)
     const email = cuser?.user?.email;
     console.log('email', email)
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 // import prisma from "./lib/prisma"
-import { compare } from "bcryptjs" // make sure you installed bcryptjs
+// import { compare } from "bcryptjs" // make sure you installed bcryptjs
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {

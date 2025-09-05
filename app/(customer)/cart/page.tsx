@@ -46,6 +46,7 @@ export default function CartPage() {
   };
 
   useEffect(() => {
+    console.log('cart page load')
     load();
   }, []);
 
