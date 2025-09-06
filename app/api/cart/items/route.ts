@@ -5,9 +5,8 @@ import { auth } from "@/auth";
 
 export async function GET() {
   try {
-    const cuser = await auth();
-    console.log('cuser form item', cuser)
-    const email = cuser?.user?.email;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Ensure DB user exists (email is unique in schema)
@@ -15,7 +14,7 @@ export async function GET() {
       where: { email },
       create: {
         email,
-        name: cuser?.fullName || cuser?.firstName || email,
+        name: session?.user?.name || email,
         password: "", // required by schema but unused for Clerk users
       },
       update: {},
@@ -38,15 +37,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const dbUser = await prisma.user.upsert({
       where: { email },
       create: {
         email,
-        name: cuser?.fullName || cuser?.firstName || email,
+        name: session?.user?.name || email,
         password: "",
       },
       update: {},
@@ -84,13 +83,13 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const dbUser = await prisma.user.upsert({
       where: { email },
-      create: { email, name: cuser?.fullName || cuser?.firstName || email, password: "" },
+      create: { email, name: session?.user?.name || email, password: "" },
       update: {},
     });
 
@@ -119,13 +118,13 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const dbUser = await prisma.user.upsert({
       where: { email },
-      create: { email, name: cuser?.fullName || cuser?.firstName || email, password: "" },
+      create: { email, name: session?.user?.name || email, password: "" },
       update: {},
     });
 

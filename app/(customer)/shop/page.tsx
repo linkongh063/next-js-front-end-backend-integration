@@ -2,7 +2,12 @@ import ProductListing from "@/components/client/ProductListing";
 import { CategoryService } from "@/lib/services/category.service";
 import { ProductService } from "@/lib/services/product.service";
 
-export default async function ProductsPage({ searchParams }: { searchParams: { category?: string } }) {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const sp = await searchParams;
   const [products, categories] = await Promise.all([
     ProductService.getProducts(),
     CategoryService.getAllCategories(),
@@ -44,7 +49,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: { c
       <ProductListing
         initialProducts={normalizeProducts(products || [])}
         categories={flatCategories(categories || [])}
-        initialCategoryId={searchParams?.category ?? "all"}
+        initialCategoryId={sp?.category ?? "all"}
       />
     </div>
   );

@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-// import { currentUser } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
-    const cuser = await auth();
-    console.log('cuser from profile', cuser)
-    const email = cuser?.user?.email;
-    console.log('email', email)
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const user = await prisma.user.upsert({
       where: { email },
       create: {
         email,
-        name: cuser?.fullName || cuser?.firstName || email,
+        name: session?.user?.name || email,
         password: "",
-        phone: cuser?.phoneNumbers?.[0]?.phoneNumber || null,
-        profilePicture: cuser?.imageUrl || null,
+        phone: null,
+        profilePicture: null,
       },
       update: {},
     });
@@ -37,8 +34,8 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();

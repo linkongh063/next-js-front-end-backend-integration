@@ -7,6 +7,7 @@ async function fetchOrders(searchParams: Record<string, string | string[] | unde
   const page = Number(searchParams.page || 1);
   const pageSize = Number(searchParams.pageSize || 10);
   const q = typeof searchParams.q === "string" ? searchParams.q : "";
+
   const sp = new URLSearchParams();
   sp.set("page", String(page));
   sp.set("pageSize", String(pageSize));
@@ -23,20 +24,30 @@ async function fetchOrders(searchParams: Record<string, string | string[] | unde
     cache: "no-store",
     headers: { cookie },
   });
+
   if (!res.ok) throw new Error("Failed to load orders");
   return res.json();
 }
 
-export default async function Page({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  const data = await fetchOrders(searchParams);
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // ✅ Await the searchParams (Next.js 15 requirement)
+  const params = await searchParams;
+  const data = await fetchOrders(params);
+
   const { orders, total, page, pageSize } = data;
-  const q = typeof searchParams.q === "string" ? searchParams.q : "";
+  const q = typeof params.q === "string" ? params.q : "";
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Completed Orders</h1>
-        <p className="text-sm text-muted-foreground">Delivered orders summary and records.</p>
+        <p className="text-sm text-muted-foreground">
+          Delivered orders summary and records.
+        </p>
       </div>
       <OrdersTable
         orders={orders}

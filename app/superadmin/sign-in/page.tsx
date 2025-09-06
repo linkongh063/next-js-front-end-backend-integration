@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function SuperadminSignInPage() {
+function SignInContent() {
   const [email, setEmail] = useState("linkon.softzino@gmail.com");
   const [password, setPassword] = useState("password");
   const [loading, setLoading] = useState(false);
@@ -51,5 +51,13 @@ export default function SuperadminSignInPage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function SuperadminSignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }

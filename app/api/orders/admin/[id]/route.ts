@@ -3,13 +3,16 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import type { OrderStatus } from "@prisma/client";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await auth();
     const role = (session as any)?.user?.role;
     if (role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const statusRaw = String(body?.status || "").toUpperCase();
     const allowed: OrderStatus[] = [

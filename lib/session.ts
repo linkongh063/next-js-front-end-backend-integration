@@ -1,16 +1,8 @@
-import { User, getServerSession } from 'next-auth'
+import type { User } from 'next-auth'
+import { auth } from '@/auth'
 
-export const session = async ({ session, token }: any) => {
-  session.user.id = token.id
-  return session
-}
-
-export const getUserSession = async (): Promise<User> => {
-  const authUserSession = await getServerSession({
-    callbacks: {
-      session,
-    },
-  })
-  // if (!authUserSession) throw new Error('unauthorized')
-  return authUserSession?.user
+// Helper to get the current user from NextAuth v5
+export const getUserSession = async (): Promise<User | null> => {
+  const s = await auth();
+  return (s?.user as User) ?? null;
 }

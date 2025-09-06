@@ -27,10 +27,15 @@ async function fetchOrders(searchParams: Record<string, string | string[] | unde
   return res.json();
 }
 
-export default async function Page({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
-  const data = await fetchOrders(searchParams);
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const data = await fetchOrders(params);
   const { orders, total, page, pageSize } = data;
-  const q = typeof searchParams.q === "string" ? searchParams.q : "";
+  const q = typeof params.q === "string" ? params.q : "";
 
   return (
     <div className="space-y-6">

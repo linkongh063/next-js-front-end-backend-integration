@@ -6,28 +6,36 @@ import { ShoppingBag, Shirt, Watch, Smartphone, Laptop, Headphones } from "lucid
 import { useEffect, useState } from "react";
 
 
-export default function CategoriesSection({propsCategories}: {propsCategories: any[]}) {
-  const [categories, setCategories] = useState([]);
+type CategoryNode = {
+  id: string | number;
+  name: string;
+  slug?: string;
+  children?: CategoryNode[];
+};
 
-  const flatCategories = (cats) => {
-    const out = [];
-    const walk = (c, level = 0) => {
-      c.forEach((cat) => {
+type FlatCategory = { id: string | number; name: string; slug?: string; level: number };
+
+export default function CategoriesSection({ propsCategories }: { propsCategories: CategoryNode[] }) {
+  const [categories, setCategories] = useState<FlatCategory[]>([]);
+
+  const flatCategories = (cats: CategoryNode[]): FlatCategory[] => {
+    const out: FlatCategory[] = [];
+    const walk = (c: CategoryNode[], level = 0) => {
+      c.forEach((cat: CategoryNode) => {
         out.push({ id: cat.id, name: cat.name, slug: cat.slug, level });
         if (cat.children?.length) walk(cat.children, level + 1);
       });
     };
-    walk(cats);
+    walk(cats ?? []);
     return out;
   };
 
 
 
   useEffect(() => {
-    console.log('props', propsCategories)
-    const categoriesFlat = flatCategories(categories || []);
-    setCategories(categoriesFlat)
-  }, [])
+    const categoriesFlat = flatCategories(propsCategories || []);
+    setCategories(categoriesFlat);
+  }, [propsCategories]);
 
   return (
     <section className="mt-10 px-4 sm:px-6 lg:px-8">

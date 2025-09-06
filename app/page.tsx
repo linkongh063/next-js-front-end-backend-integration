@@ -71,10 +71,10 @@ export default async function Home() {
     CategoryService.getAllCategories(),
   ]);
 
-  const flatCategories = (cats) => {
-    const out = [];
-    const walk = (c, level = 0) => {
-      c.forEach((cat) => {
+  const flatCategories = (cats: any[]) => {
+    const out: any[] = [];
+    const walk = (c: any[], level = 0) => {
+      c.forEach((cat: any) => {
         out.push({ id: cat.id, name: cat.name, slug: cat.slug, level });
         if (cat.children?.length) walk(cat.children, level + 1);
       });

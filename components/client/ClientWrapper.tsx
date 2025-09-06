@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
-import { MegaMenu } from "./menu/Megamenu";
+import { MegaMenu } from "./menu/MegaMenu";
 export default function ClientWrapper({
   children,
 }: {

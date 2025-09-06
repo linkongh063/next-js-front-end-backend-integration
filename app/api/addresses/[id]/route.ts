@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const cuser = await currentUser();
     const email = cuser?.emailAddresses?.[0]?.emailAddress;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +19,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { fullName, phone, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = body || {};
 
     // Ensure ownership
-    const existing = await prisma.address.findUnique({ where: { id: params.id } });
+    const existing = await prisma.address.findUnique({ where: { id } });
     if (!existing || existing.userId !== dbUser.id) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (isDefault === true) {
@@ -23,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const updated = await prisma.address.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(fullName != null ? { fullName: String(fullName) } : {}),
         ...(phone != null ? { phone: String(phone) } : {}),
@@ -43,8 +47,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const cuser = await currentUser();
     const email = cuser?.emailAddresses?.[0]?.emailAddress;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -53,10 +61,10 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     if (!dbUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Ensure ownership
-    const existing = await prisma.address.findUnique({ where: { id: params.id } });
+    const existing = await prisma.address.findUnique({ where: { id } });
     if (!existing || existing.userId !== dbUser.id) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await prisma.address.delete({ where: { id: params.id } });
+    await prisma.address.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Server error" }, { status: 500 });

@@ -12,13 +12,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        // console.log('credentials', credentials)
-        if (!credentials?.email || !credentials.password) {
-          throw new Error("Missing email or password")
+        // Normalize and validate incoming credentials
+        const email = typeof credentials?.email === "string" ? credentials.email : "";
+        const password = typeof credentials?.password === "string" ? credentials.password : "";
+        if (!email || !password) {
+          throw new Error("Missing email or password");
         }
-        // console.log('credentials', credentials)
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         })
         // console.log('user', user)
         
@@ -27,13 +29,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         // check password hash
-        if (user.password === credentials.password) {
+        if (user.password === password) {
           console.log('password match')
         } else {
           console.log('password not match')
         }
-        // const valid = await compare(credentials.password, user.password)
-        const valid = user.password === credentials.password ? true : false
+        // const valid = await compare(password, user.password)
+        const valid = user.password === password ? true : false
         console.log('valid', valid)
         if (!valid) {
           throw new Error("Invalid email or password 111")
@@ -51,15 +53,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
-        token.role = user.role
+        (token as any).id = (user as any).id;
+        (token as any).role = (user as any).role;
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
+      if (token && session.user) {
+        (session.user as any).id = (token as any).id as string;
+        (session.user as any).role = (token as any).role as string;
       }
       return session
     },
