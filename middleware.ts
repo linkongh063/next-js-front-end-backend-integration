@@ -11,9 +11,9 @@ const privateRoute = ["/cart/:path*", "/profile/:path*", "/admin/:path*"]
 export default auth(async function middleware(req: NextRequest) {
   const { nextUrl } = req
   const session = await auth()
-  console.log('called middleware when matcher is there')
-  console.log('nextUrl', nextUrl)
-  console.log('session', session)
+  // console.log('called middleware when matcher is there')
+  // console.log('nextUrl', nextUrl)
+  // console.log('session', session)
 
 
   const isAuthenticated = !!session?.user;

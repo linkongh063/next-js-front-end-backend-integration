@@ -1,6 +1,7 @@
 import { authConfig } from './lib/auth/config';
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import prisma from './lib/prisma';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -16,12 +17,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Missing email or password")
         }
         console.log('credentials', credentials)
-        // const user = await prisma.user.findUnique({
-        //   where: { email: credentials.email },
-        // })
-        const user = { email: 'm.alinkon10@gmail.com', password: 'password', name: 'Md Abdul Ahad Linkon', role: 'CUSTOMER', id: '6ec07df2-8438-4793-9bab-274037b3711d' }
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        })
         console.log('user', user)
-
+        
         if (!user) {
           throw new Error("Invalid email or password 000")
         }
