@@ -10,18 +10,30 @@ import { Button } from "@/components/ui/button"
 import { Mail, Lock } from "lucide-react"
 
 export default function LoginPage() {
+  const [error, setError] = React.useState<string | null>(null)
   const onSubmitLoginForm = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const response = await doCredentialLogin(formData)
-    console.log("response from login", response)
+    e.preventDefault();
+    setError(null); // Reset error state on new submission
 
-    if (response?.error) {
-      throw new Error(response.error)
+    try {
+      const formData = new FormData(e.currentTarget);
+      const response = await doCredentialLogin(formData);
+
+      if (response?.success) {
+        redirect("/profile/profileinfo");
+      }
+      
+
+      if (response?.error) {
+        setError(response.error);
+      } 
+
+    } catch (error) {
+      // Catch unexpected errors
+      // console.log('error occur')
+      // setError("An unexpected error occurred. Please try again.");
     }
-
-    redirect("/profile")
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
@@ -33,6 +45,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={onSubmitLoginForm} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">

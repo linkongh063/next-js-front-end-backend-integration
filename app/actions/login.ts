@@ -1,5 +1,6 @@
 'use server'
 
+import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/auth";
 import { revalidatePath } from "next/cache";
 
@@ -16,15 +17,21 @@ export async function doCredentialLogin(formData) {
   console.log("formData", formData);
 
   try {
-    const response = await signIn("credentials", {
+    await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
-      redirect: false,
+      redirectTo: '/profile/profileinfo',
     });
-    console.log('response from login', response)
     revalidatePath("/");
-    return response;
   } catch (err) {
+    if (err instanceof AuthError) {
+      switch (err.type) {
+        case "CredentialsSignin":
+          return { error: "Invalid credentials.", success: false };
+        default:
+          return { error: 'give valid email and password credentials', success: false };
+      }
+    }
     throw err;
   }
 }
