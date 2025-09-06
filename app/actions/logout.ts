@@ -8,3 +8,4 @@ export async function logout() {
   await signOut();
   redirect("/");
 }
+

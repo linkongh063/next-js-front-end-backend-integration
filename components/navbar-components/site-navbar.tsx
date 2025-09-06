@@ -16,108 +16,108 @@ export function SiteNavbar() {
   
   const [currentUser, setCurrentUser] = useState<any | null>(null);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const session = await auth();
-      setCurrentUser(session?.user ?? null);
-    };
-    getUser();
-  }, []);
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const session = await auth();
+  //     setCurrentUser(session?.user ?? null);
+  //   };
+  //   getUser();
+  // }, []);
 
   // ✅ Fetch categories with caching
-  useEffect(() => {
-    let active = true;
-    const CACHE_KEY = "navCatsCache_v1";
-    const DAY_MS = 24 * 60 * 60 * 1000;
+  // useEffect(() => {
+  //   let active = true;
+  //   const CACHE_KEY = "navCatsCache_v1";
+  //   const DAY_MS = 24 * 60 * 60 * 1000;
 
-    const loadFromCache = (): any[] | null => {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        const { updatedAt, data } = parsed;
-        if (!updatedAt || !Array.isArray(data)) return null;
-        if (Date.now() - updatedAt > DAY_MS) return null; // expired
-        return data;
-      } catch {
-        return null;
-      }
-    };
+  //   const loadFromCache = (): any[] | null => {
+  //     try {
+  //       const raw = localStorage.getItem(CACHE_KEY);
+  //       if (!raw) return null;
+  //       const parsed = JSON.parse(raw);
+  //       const { updatedAt, data } = parsed;
+  //       if (!updatedAt || !Array.isArray(data)) return null;
+  //       if (Date.now() - updatedAt > DAY_MS) return null; // expired
+  //       return data;
+  //     } catch {
+  //       return null;
+  //     }
+  //   };
 
-    const saveToCache = (data: any[]) => {
-      try {
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify({ updatedAt: Date.now(), data })
-        );
-      } catch {}
-    };
+  //   const saveToCache = (data: any[]) => {
+  //     try {
+  //       localStorage.setItem(
+  //         CACHE_KEY,
+  //         JSON.stringify({ updatedAt: Date.now(), data })
+  //       );
+  //     } catch {}
+  //   };
 
-    (async () => {
-      const cached = loadFromCache();
-      if (cached && active) {
-        setCats(cached);
-        return;
-      }
-      try {
-        const res = await fetch("/api/category", { cache: "no-store" });
-        const data = await res.json();
-        if (!active) return;
-        const arr = Array.isArray(data) ? data : [];
-        setCats(arr);
-        saveToCache(arr);
-      } catch (e) {
-        console.error("Failed to load categories", e);
-      }
-    })();
+  //   (async () => {
+  //     const cached = loadFromCache();
+  //     if (cached && active) {
+  //       setCats(cached);
+  //       return;
+  //     }
+  //     try {
+  //       const res = await fetch("/api/category", { cache: "no-store" });
+  //       const data = await res.json();
+  //       if (!active) return;
+  //       const arr = Array.isArray(data) ? data : [];
+  //       setCats(arr);
+  //       saveToCache(arr);
+  //     } catch (e) {
+  //       console.error("Failed to load categories", e);
+  //     }
+  //   })();
 
-    return () => {
-      active = false;
-    };
-  }, []);
+  //   return () => {
+  //     active = false;
+  //   };
+  // }, []);
 
   // ✅ Fetch cart count
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/cart/items", { cache: "no-store" });
-        if (res.status === 401) return; // signed-out; show 0
-        const data = await res.json();
-        if (!cancelled) {
-          const items = Array.isArray(data?.items) ? data.items : [];
-          const totalQty = items.reduce(
-            (s: number, it: any) => s + (Number(it.quantity) || 0),
-            0
-          );
-          setCartCount(totalQty);
-        }
-      } catch {}
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]);
+  // useEffect(() => {
+  //   let cancelled = false;
+  //   (async () => {
+  //     try {
+  //       const res = await fetch("/api/cart/items", { cache: "no-store" });
+  //       if (res.status === 401) return; // signed-out; show 0
+  //       const data = await res.json();
+  //       if (!cancelled) {
+  //         const items = Array.isArray(data?.items) ? data.items : [];
+  //         const totalQty = items.reduce(
+  //           (s: number, it: any) => s + (Number(it.quantity) || 0),
+  //           0
+  //         );
+  //         setCartCount(totalQty);
+  //       }
+  //     } catch {}
+  //   })();
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [pathname]);
 
   // ✅ React to global cart updates
-  useEffect(() => {
-    const handler = async () => {
-      try {
-        const res = await fetch("/api/cart/items", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        const items = Array.isArray(data?.items) ? data.items : [];
-        const totalQty = items.reduce(
-          (s: number, it: any) => s + (Number(it.quantity) || 0),
-          0
-        );
-        setCartCount(totalQty);
-      } catch {}
-    };
-    window.addEventListener("cart:updated", handler as EventListener);
-    return () =>
-      window.removeEventListener("cart:updated", handler as EventListener);
-  }, []);
+  // useEffect(() => {
+  //   const handler = async () => {
+  //     try {
+  //       const res = await fetch("/api/cart/items", { cache: "no-store" });
+  //       if (!res.ok) return;
+  //       const data = await res.json();
+  //       const items = Array.isArray(data?.items) ? data.items : [];
+  //       const totalQty = items.reduce(
+  //         (s: number, it: any) => s + (Number(it.quantity) || 0),
+  //         0
+  //       );
+  //       setCartCount(totalQty);
+  //     } catch {}
+  //   };
+  //   window.addEventListener("cart:updated", handler as EventListener);
+  //   return () =>
+  //     window.removeEventListener("cart:updated", handler as EventListener);
+  // }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -219,7 +219,7 @@ export function SiteNavbar() {
           </Button>
 
           {/* Cart */}
-          <Button variant="ghost" size="icon" className="relative" asChild>
+          {/* <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href="/cart">
               <ShoppingBag className="h-5 w-5" />
               <span className="sr-only">Cart</span>
@@ -229,7 +229,7 @@ export function SiteNavbar() {
                 </span>
               )}
             </Link>
-          </Button>
+          </Button> */}
         </div>
       </div>
 

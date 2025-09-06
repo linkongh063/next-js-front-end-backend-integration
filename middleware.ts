@@ -1,34 +1,40 @@
+import NextAuth from "next-auth"
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { authConfig } from "./lib/auth/config"
+
+const { auth } = NextAuth(authConfig);
+
+const publicPaths = ["/sign-in", "/sign-up", "/superadmin/sign-in", "/superadmin/sign-up", "/shop/:path*", "/products/:path*"];
+const rootRoute = '/'
+const privateRoute = ["/cart/:path*", "/profile/:path*", "/admin/:path*"]
 
 export default auth(async function middleware(req: NextRequest) {
   const { nextUrl } = req
-  const pathname = nextUrl.pathname
+  const session = await auth()
+  console.log('called middleware when matcher is there')
+  console.log('nextUrl', nextUrl)
+  console.log('session', session)
 
-  console.log("middleware called")
-  console.log("auth object:", req.auth)
 
-  // Protect /cart and /profile
-  if (!req.auth && ["/cart", "/profile"].some((r) => pathname.startsWith(r))) {
-    console.log('go to the sign in page from middleware')
-    return NextResponse.redirect(new URL("/sign-in", req.url))
-  }
+  const isAuthenticated = !!session?.user;
 
-  // Protect /admin (only admins allowed)
-  if (pathname.startsWith("/admin")) {
-    if (!req.auth || req.auth.user?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url))
-    }
-  }
-  console.log('req.url from middleware', req.url)
-  // if(req.auth.user){
-  //   console.log('console auth', req.auth.user)
-  //   return NextResponse.redirect(req.url)
-  // }
+  const isPublicRoute = ((publicPaths.find(route => nextUrl.pathname.startsWith(route))
+  || nextUrl.pathname === rootRoute) && !privateRoute.find(route => nextUrl.pathname.includes(route)));
+
+  console.log('isPublicRoute:',isPublicRoute);
+
+
+  if (!isAuthenticated && !isPublicRoute)
+    return Response.redirect(new URL('/sign-in', nextUrl));
+
 
   return NextResponse.next()
 })
 
 export const config = {
-  matcher: ["/cart/:path*", "/profile/:path*", "/admin/:path*"],
-}
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
+};
+
+// export const config = {
+//   matcher: ["/cart/:path*", "/profile/:path*", "/admin/:path*"],
+// }

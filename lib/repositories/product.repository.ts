@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 export const ProductRepository = {
 
   findAll: () => {
-    console.log('hit the apis')
+    // console.log('hit the apis')
     const product = prisma.product.findMany({
       where: {
         status: 'ACTIVE'
@@ -15,7 +15,7 @@ export const ProductRepository = {
         images: true,
       },
     })
-    console.log('product',product)
+    // console.log('product',product)
     return product
   }
   ,

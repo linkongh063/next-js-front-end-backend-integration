@@ -1,12 +1,9 @@
+import { authConfig } from './lib/auth/config';
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-// import prisma from "./lib/prisma"
-// import { compare } from "bcryptjs" // make sure you installed bcryptjs
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  session: {
-    strategy: "jwt",
-  },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -22,7 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // const user = await prisma.user.findUnique({
         //   where: { email: credentials.email },
         // })
-        const user = {email: 'm.alinkon10@gmail.com', password: 'password', name: 'Md Abdul Ahad Linkon', role: 'CUSTOMER', id: '6ec07df2-8438-4793-9bab-274037b3711d'}
+        const user = { email: 'm.alinkon10@gmail.com', password: 'password', name: 'Md Abdul Ahad Linkon', role: 'CUSTOMER', id: '6ec07df2-8438-4793-9bab-274037b3711d' }
         console.log('user', user)
 
         if (!user) {
@@ -32,7 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // check password hash
         if (user.password === credentials.password) {
           console.log('password match')
-        }else{
+        } else {
           console.log('password not match')
         }
         // const valid = await compare(credentials.password, user.password)
