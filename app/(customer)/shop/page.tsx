@@ -2,6 +2,8 @@ import ProductListing from "@/components/client/ProductListing";
 import { CategoryService } from "@/lib/services/category.service";
 import { ProductService } from "@/lib/services/product.service";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage({
   searchParams,
 }: {

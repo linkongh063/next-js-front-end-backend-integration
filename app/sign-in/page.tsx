@@ -1,7 +1,7 @@
 'use client'
 
-import React from "react"
-import { redirect } from "next/navigation"
+import React, { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { doCredentialLogin } from "../actions/login"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,29 +9,33 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Mail, Lock } from "lucide-react"
 
+// Wrapper to satisfy Next.js requirement: useSearchParams must be within Suspense
 export default function LoginPage() {
-  const [error, setError] = React.useState<string | null>(null)
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6">Loading...</div>}>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/profile/profileinfo";
+  const [error, setError] = React.useState<string | null>(null);
+
   const onSubmitLoginForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null); // Reset error state on new submission
-
+    setError(null);
     try {
       const formData = new FormData(e.currentTarget);
+      // Ensure callbackUrl is passed to the server action
+      formData.set("callbackUrl", callbackUrl);
       const response = await doCredentialLogin(formData);
-
-      if (response?.success) {
-        redirect("/profile/profileinfo");
-      }
-      
-
       if (response?.error) {
         setError(response.error);
-      } 
-
-    } catch (error) {
-      // Catch unexpected errors
-      // console.log('error occur')
-      // setError("An unexpected error occurred. Please try again.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -45,49 +49,31 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={onSubmitLoginForm} className="space-y-5">
-            {/* Email */}
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="pl-10"
-                  required
-                />
+                <Mail className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Input id="email" name="email" type="email" placeholder="you@example.com" className="pl-9" required />
               </div>
             </div>
-
-            {/* Password */}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10"
-                  required
-                />
+                <Lock className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Input id="password" name="password" type="password" placeholder="••••••••" className="pl-9" required />
               </div>
             </div>
-
-            {/* Button */}
-            <Button type="submit" className="w-full">
-              Sign In
-            </Button>
+            <input type="hidden" name="callbackUrl" value={callbackUrl} />
+            <Button type="submit" className="w-full">Sign In</Button>
           </form>
-
-          {/* Extras */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            Don’t have an account?{" "}
+            Don’t have an account? {" "}
             <a href="/register" className="font-medium text-blue-600 hover:underline">
               Sign up
             </a>
@@ -95,5 +81,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

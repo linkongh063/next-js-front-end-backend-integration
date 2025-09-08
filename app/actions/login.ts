@@ -17,12 +17,14 @@ export async function doCredentialLogin(formData: FormData) {
   console.log("formData", formData);
 
   try {
+    const callbackUrl = (formData.get("callbackUrl") || "/profile/profileinfo").toString();
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
-      redirect: false,
+      redirectTo: callbackUrl,
     });
-    // If we get here, sign-in did not redirect and no error was thrown
+    // If signIn succeeds, NextAuth will redirect to redirectTo.
+    // Return a success flag for completeness (may not be reached in practice).
     return { success: true } as const;
   } catch (err) {
     if (err instanceof AuthError) {
