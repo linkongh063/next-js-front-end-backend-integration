@@ -40,12 +40,31 @@ export default function ProductDetails({ product }: { product: Product }) {
   const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
   const [mainImage, setMainImage] = useState(cover);
 
-  const getCartItem = () => {
+  // Compute a fallback price from variants (min price) since Product has no direct price field
+  const variantPrices: number[] = Array.isArray(variants)
+    ? variants
+        .map((v: any) => {
+          const n = Number(v?.price);
+          return isNaN(n) ? undefined : n;
+        })
+        .filter((n: number | undefined): n is number => n != null)
+    : [];
+  const minVariantPrice = variantPrices.length ? Math.min(...variantPrices) : 0;
+
+  type CartItem = { id: string; name: string; price: any; sku?: string };
+
+  const getCartItem = (): CartItem | null => {
     if (variants.length > 0) {
-      return selectedVariant;
+      if (!selectedVariant) return null;
+      return {
+        id: selectedVariant.id,
+        name: product.name,
+        price: selectedVariant.price,
+        sku: (selectedVariant as any)?.sku,
+      };
     }
     // no variants → fallback to product itself
-    return { id: product.id, name: product.name, price: product.price ?? 0 };
+    return { id: product.id, name: product.name, price: minVariantPrice };
   };
 
   const handleAddToCart = () => {

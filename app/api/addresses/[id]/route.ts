@@ -4,10 +4,10 @@ import { currentUser } from "@clerk/nextjs/server";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: any
 ) {
   try {
-    const { id } = await params;
+    const { id } = context.params || {};
     const cuser = await currentUser();
     const email = cuser?.emailAddresses?.[0]?.emailAddress;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -49,10 +49,10 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: any
 ) {
   try {
-    const { id } = await params;
+    const { id } = context.params || {};
     const cuser = await currentUser();
     const email = cuser?.emailAddresses?.[0]?.emailAddress;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

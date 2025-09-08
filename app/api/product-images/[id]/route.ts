@@ -3,8 +3,8 @@ import { ProductImageService } from '@/lib/services/product-image.service';
 import { unlink } from 'fs/promises';
 import path from 'path';
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function GET(_: Request, context: any) {
+  const { id } = context.params || {};
   const image = await ProductImageService.getImageById(id);
   if (!image) {
     return NextResponse.json({ error: 'Not Found' }, { status: 404 });
@@ -12,9 +12,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   return NextResponse.json(image);
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(req: Request, context: any) {
   try {
-    const { id } = await params;
+    const { id } = context.params || {};
     const body = await req.json();
     const updatedImage = await ProductImageService.updateImage(id, body);
 
@@ -34,9 +34,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: Request, context: any) {
   try {
-    const { id } = await params;
+    const { id } = context.params || {};
     const body = await req.json();
     const updatedImage = await ProductImageService.updateImage(id, body);
 
@@ -56,9 +56,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_: Request, context: any) {
   try {
-    const { id } = await params;
+    const { id } = context.params || {};
     // First get the image to retrieve the imageUrl before deleting
     const image = await ProductImageService.getImageById(id);
     
