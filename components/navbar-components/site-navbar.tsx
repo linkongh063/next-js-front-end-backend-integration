@@ -5,15 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { auth } from "@/auth";
+import { CategoryService } from "@/lib/services/category.service";
 
 export async function SiteNavbar() {
   const session = await auth();
   const cartCount = 1
+
+  const [categories] = await Promise.all([
+    CategoryService.getAllCategories(),
+  ])
+
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Desktop logo */}
-        <div className="hidden lg:flex lg:flex-1">
+        <div className="hidden lg:flex w-auto">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-bold">Ecomx</span>
           </Link>
@@ -30,6 +37,18 @@ export async function SiteNavbar() {
                 Shop
               </Link>
             </li>
+            {
+              categories.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/shop?category=${c.id}`}
+                    className="text-sm font-medium hover:text-gray-600"
+                  >
+                    {c.name}
+                  </Link>
+                </li>
+              ))
+            }
             {/* {cats.map((c) => (
               <li key={c.id}>
                 <Link
@@ -40,22 +59,22 @@ export async function SiteNavbar() {
                 </Link>
               </li>
             ))} */}
-            <li>
+            {/* <li>
               <Link
                 href="/new-arrivals"
                 className="text-sm font-medium hover:text-gray-600"
               >
                 New Arrivals
               </Link>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <Link
                 href="/sale"
                 className="text-sm font-medium hover:text-gray-600"
               >
                 Sale
               </Link>
-            </li>
+            </li> */}
           </ul>
         </nav>
 
