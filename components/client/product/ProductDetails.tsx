@@ -4,6 +4,7 @@ import { Product } from "@/lib/types/product";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useCartStore } from "@/app/store/cartStore";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,6 +28,19 @@ function formatPrice(value: any): string {
   } catch {
     return "";
   }
+
+function toNumberPrice(value: any): number {
+  if (value == null) return 0;
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return parseFloat(value) || 0;
+  try {
+    const s = value.toString?.() ?? String(value);
+    const n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  } catch {
+    return 0;
+  }
+}
 }
 
 export default function ProductDetails({ product }: { product: Product }) {
@@ -54,23 +68,28 @@ export default function ProductDetails({ product }: { product: Product }) {
   type CartItem = { id: string; name: string; price: any; sku?: string };
 
   const getCartItem = (): CartItem | null => {
-    if (variants.length > 0) {
-      if (!selectedVariant) return null;
-      return {
-        id: selectedVariant.id,
-        name: product.name,
-        price: selectedVariant.price,
-        sku: (selectedVariant as any)?.sku,
-      };
-    }
-    // no variants → fallback to product itself
-    return { id: product.id, name: product.name, price: minVariantPrice };
+    // Only allow cart items when a variant is explicitly selected
+    if (variants.length === 0) return null;
+    if (!selectedVariant) return null;
+    return {
+      id: selectedVariant.id,
+      name: product.name,
+      price: selectedVariant.price,
+      sku: (selectedVariant as any)?.sku,
+    };
   };
 
   const handleAddToCart = () => {
     const item = getCartItem();
     if (!item) return alert("Please select a variant.");
-    alert(`Added ${product.name} to cart (SKU: ${item.sku ?? "default"})`);
+    const addToCart = useCartStore.getState().addToCart;
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: toNumberPrice(item.price),
+      quantity: 1,
+    });
+    // Optionally show a confirmation or toast here
   };
 
   const handleBuyNow = () => {
@@ -81,6 +100,8 @@ export default function ProductDetails({ product }: { product: Product }) {
   const handleWishlist = () => {
     alert(`Toggled wishlist for ${product.name}`);
   };
+
+  const canAddOrBuy = variants.length > 0 && !!selectedVariant;
 
   // Fake reviews
   const reviews = [
@@ -185,12 +206,20 @@ export default function ProductDetails({ product }: { product: Product }) {
             <p className="mt-4 text-sm text-gray-700">{product.description}</p>
           )}
 
+          {/* Availability / Selection notice */}
+          {!variants.length && (
+            <p className="mt-4 text-sm text-red-600">This product is currently unavailable (no variants).</p>
+          )}
+          {variants.length > 0 && !selectedVariant && (
+            <p className="mt-4 text-sm text-amber-600">Please select a variant to proceed.</p>
+          )}
+
           {/* CTA */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button onClick={handleAddToCart} className="bg-black hover:bg-gray-800">
+            <Button onClick={handleAddToCart} className="bg-black hover:bg-gray-800 disabled:opacity-50" disabled={!canAddOrBuy} title={!canAddOrBuy ? "Select a variant first" : undefined}>
               🛒 Add to Cart
             </Button>
-            <Button onClick={handleBuyNow} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleBuyNow} className="bg-green-600 hover:bg-green-700 disabled:opacity-50" disabled={!canAddOrBuy} title={!canAddOrBuy ? "Select a variant first" : undefined}>
               ⚡ Buy Now
             </Button>
             <Button variant="outline" onClick={handleWishlist}>
