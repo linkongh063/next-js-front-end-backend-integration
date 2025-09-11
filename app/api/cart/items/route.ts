@@ -66,13 +66,25 @@ export async function POST(req: NextRequest) {
 
     // Upsert cart item (increase quantity if exists)
     const existing = await prisma.cartItem.findFirst({ where: { cartId: cart.id, variantId } });
+    const requestedQty = Number(quantity || 1);
+    const currentQty = existing ? existing.quantity : 0;
+    const newQty = currentQty + requestedQty;
+
+    if (variant.stockQuantity != null && newQty > Number(variant.stockQuantity)) {
+      const available = Math.max(0, Number(variant.stockQuantity) - currentQty);
+      return NextResponse.json(
+        { error: `Only ${available} left in stock for this item.` },
+        { status: 400 }
+      );
+    }
+
     const item = existing
       ? await prisma.cartItem.update({
           where: { id: existing.id },
-          data: { quantity: existing.quantity + Number(quantity || 1) },
+          data: { quantity: newQty },
         })
       : await prisma.cartItem.create({
-          data: { cartId: cart.id, variantId, quantity: Number(quantity || 1) },
+          data: { cartId: cart.id, variantId, quantity: requestedQty },
         });
 
     return NextResponse.json({ ok: true, item });

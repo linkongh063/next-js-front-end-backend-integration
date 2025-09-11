@@ -6,10 +6,10 @@ import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { auth } from "@/auth";
 import { CategoryService } from "@/lib/services/category.service";
+import { CartCount } from "@/components/cart-count";
 
 export async function SiteNavbar() {
   const session = await auth();
-  const cartCount = 1
 
   const [categories] = await Promise.all([
     CategoryService.getAllCategories(),
@@ -81,6 +81,14 @@ export async function SiteNavbar() {
         {/* actions */}
         <div className="flex flex-1 items-center justify-end space-x-4">
 
+          {/* Mobile menu button */}
+          <div className="lg:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
+
           {/* User account */}
           <div>
             <span className="px-2">{session?.user?.name && session.user.name}</span>
@@ -92,18 +100,13 @@ export async function SiteNavbar() {
             </Button>
           </div>
 
-          {/* Cart */}
-          <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="sr-only">Cart</span>
-              {cartCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
-                  {cartCount}
-                </span>
-              )}
+          {/* User actions */}
+          <div className="flex items-center space-x-4">
+            <Link href="/search" className="p-2 text-gray-700 hover:text-gray-900">
+              <Search className="h-5 w-5" />
             </Link>
-          </Button>
+            <CartCount />
+          </div>
         </div>
       </div>
     </header>

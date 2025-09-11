@@ -3,18 +3,20 @@
 import { Product } from "@/lib/types/product";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/app/store/cartStore";
 import {
   Breadcrumb,
+  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 // handle price coming as Prisma.Decimal | string | number
 function formatPrice(value: any): string {
@@ -28,22 +30,11 @@ function formatPrice(value: any): string {
   } catch {
     return "";
   }
-
-function toNumberPrice(value: any): number {
-  if (value == null) return 0;
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return parseFloat(value) || 0;
-  try {
-    const s = value.toString?.() ?? String(value);
-    const n = parseFloat(s);
-    return isNaN(n) ? 0 : n;
-  } catch {
-    return 0;
-  }
-}
 }
 
 export default function ProductDetails({ product }: { product: Product }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const cover =
     product.images?.find((i: any) => i.isFeatured)?.imageUrl ||
     product.images?.[0]?.imageUrl ||
@@ -53,6 +44,10 @@ export default function ProductDetails({ product }: { product: Product }) {
   const variants = product.variants || [];
   const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
   const [mainImage, setMainImage] = useState(cover);
+  const [qty, setQty] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
+  const { addToCart, fetchCartCount } = useCartStore();
 
   // Compute a fallback price from variants (min price) since Product has no direct price field
   const variantPrices: number[] = Array.isArray(variants)
@@ -79,17 +74,81 @@ export default function ProductDetails({ product }: { product: Product }) {
     };
   };
 
-  const handleAddToCart = () => {
-    const item = getCartItem();
-    if (!item) return alert("Please select a variant.");
-    const addToCart = useCartStore.getState().addToCart;
-    addToCart({
-      id: item.id,
-      name: item.name,
-      price: toNumberPrice(item.price),
-      quantity: 1,
+  // Clamp quantity to stock when variant changes
+  useEffect(() => {
+    if (!selectedVariant) return;
+    const max = Number((selectedVariant as any)?.stockQuantity || 0);
+    setQty(prevQty => {
+      if (prevQty < 1) return 1;
+      if (max > 0 && prevQty > max) return max;
+      return prevQty;
     });
-    // Optionally show a confirmation or toast here
+  }, [selectedVariant]);
+  
+  // Fetch initial cart count
+  useEffect(() => {
+    fetchCartCount().catch(console.error);
+  }, [fetchCartCount]);
+
+  const handleAddToCart = async () => {
+    const cartItem = getCartItem();
+    if (!cartItem) {
+      setToast({ show: true, message: 'Please select a variant' });
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+      return;
+    }
+    
+    const max = Number((selectedVariant as any)?.stockQuantity || 0);
+    if (max > 0 && qty > max) {
+      setToast({ show: true, message: `Only ${max} left in stock` });
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+      setQty(max);
+      return;
+    }
+
+    try {
+      setIsAddingToCart(true);
+      const res = await fetch("/api/cart/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          variantId: cartItem.id, 
+          quantity: qty 
+        }),
+      });
+      
+      if (res.status === 401) {
+        // Not authenticated → go to sign-in and return back here
+        router.push(`/sign-in?callbackUrl=${encodeURIComponent(pathname || "/")}`);
+        return;
+      }
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to add to cart');
+      }
+      
+      // Refresh the cart state
+      await fetchCartCount();
+      
+      // Show success message
+      setToast({ 
+        show: true, 
+        message: `✅ Successfully added ${qty}x ${product.name} to cart!` 
+      });
+      
+      // Clear toast after delay
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+    } catch (e: any) {
+      console.error('Add to cart error:', e);
+      setToast({ 
+        show: true, 
+        message: e?.message || 'Failed to add to cart. Please try again.' 
+      });
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   const handleBuyNow = () => {
@@ -101,7 +160,7 @@ export default function ProductDetails({ product }: { product: Product }) {
     alert(`Toggled wishlist for ${product.name}`);
   };
 
-  const canAddOrBuy = variants.length > 0 && !!selectedVariant;
+  const canAddToCart = variants.length > 0 && !!selectedVariant;
 
   // Fake reviews
   const reviews = [
@@ -201,9 +260,64 @@ export default function ProductDetails({ product }: { product: Product }) {
             <p className="mt-4 text-2xl font-bold text-gray-900">${formatPrice(selectedVariant.price)}</p>
           )}
 
+          {/* Toast Notification */}
+          {toast.show && (
+            <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-md shadow-lg transition-all duration-300 transform hover:scale-105">
+              <div className="flex items-center space-x-2">
+                <span>{toast.message}</span>
+              </div>
+            </div>
+          )}
+
           {/* Description */}
           {product.description && (
             <p className="mt-4 text-sm text-gray-700">{product.description}</p>
+          )}
+
+          {/* Quantity */}
+          {selectedVariant && (
+            <div className="mt-4 flex items-center gap-3">
+              <span className="text-sm text-gray-600">Quantity</span>
+              <div className="flex items-center border rounded-md overflow-hidden">
+                <button
+                  type="button"
+                  className="px-3 py-1 disabled:opacity-50"
+                  onClick={() => setQty(prevQty => Math.max(1, prevQty - 1))}
+                  disabled={qty <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  max={Number((selectedVariant as any)?.stockQuantity || 9999)}
+                  value={qty}
+                  onChange={(e) => {
+                    const v = Math.max(1, Number(e.target.value) || 1);
+                    const max = Number((selectedVariant as any)?.stockQuantity || 0);
+                    setQty(max > 0 ? Math.min(v, max) : v);
+                  }}
+                  aria-label="Quantity"
+                  title="Quantity"
+                  className="w-16 text-center outline-none py-1"
+                />
+                <button
+                  type="button"
+                  className="px-3 py-1 disabled:opacity-50"
+                  onClick={() => {
+                    const max = Number((selectedVariant as any)?.stockQuantity || 0);
+                    setQty(prevQty => (max > 0 ? Math.min(prevQty + 1, max) : prevQty + 1));
+                  }}
+                  disabled={(() => {
+                    const max = Number((selectedVariant as any)?.stockQuantity || 0);
+                    return max > 0 && qty >= max;
+                  })()}
+                >
+                  +
+                </button>
+              </div>
+              <span className="text-xs text-gray-500">In stock: {Number((selectedVariant as any)?.stockQuantity || 0)}</span>
+            </div>
           )}
 
           {/* Availability / Selection notice */}
@@ -216,10 +330,14 @@ export default function ProductDetails({ product }: { product: Product }) {
 
           {/* CTA */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button onClick={handleAddToCart} className="bg-black hover:bg-gray-800 disabled:opacity-50" disabled={!canAddOrBuy} title={!canAddOrBuy ? "Select a variant first" : undefined}>
-              🛒 Add to Cart
+            <Button
+              onClick={handleAddToCart}
+              disabled={!canAddToCart || isAddingToCart}
+              className="w-full"
+            >
+              {isAddingToCart ? 'Adding...' : 'Add to Cart'}
             </Button>
-            <Button onClick={handleBuyNow} className="bg-green-600 hover:bg-green-700 disabled:opacity-50" disabled={!canAddOrBuy} title={!canAddOrBuy ? "Select a variant first" : undefined}>
+            <Button onClick={handleBuyNow} className="bg-green-600 hover:bg-green-700 disabled:opacity-50" disabled={!canAddToCart} title={!canAddToCart ? "Select a variant first" : undefined}>
               ⚡ Buy Now
             </Button>
             <Button variant="outline" onClick={handleWishlist}>
@@ -229,8 +347,8 @@ export default function ProductDetails({ product }: { product: Product }) {
         </div>
       </div>
 
-     {/* Reviews */}
-     <section className="mt-12">
+      {/* Reviews */}
+      <section className="mt-12">
         <h2 className="text-lg font-semibold mb-4">Customer Reviews</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {reviews.map((r) => (
