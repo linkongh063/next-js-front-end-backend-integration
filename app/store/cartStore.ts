@@ -30,6 +30,7 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   addToCart: (item) =>
     set((state) => {
+      console.log("item is doing cart", item)
       const existing = state.cart.find((i) => i.id === item.id);
       const newCart = existing
         ? state.cart.map((i) =>

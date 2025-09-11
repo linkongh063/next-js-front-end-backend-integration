@@ -9,8 +9,20 @@ export default async function ProductDetailsPage({
   const { id } = await params;
   const product = await ProductService.getProductById(id);
   if (!product) return <div className="container py-8">Product not found.</div>;
-  console.log('product::',product)
+  
+  // Serialize Decimal fields to strings for client component
+  const serializedProduct = {
+    ...product,
+    variants: product.variants?.map(variant => ({
+      ...variant,
+      price: variant.price.toString(),
+      cost: variant.cost?.toString() || null,
+    })) || []
+  };
+  
   return (
-    <ProductDetails product={product} />
+    <div>
+      <ProductDetails product={serializedProduct} />
+    </div>
   );
 }

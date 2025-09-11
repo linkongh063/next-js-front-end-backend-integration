@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 function generateOrderNumber() {
   const rand = Math.floor(Math.random() * 1_000_000).toString().padStart(6, "0");
@@ -9,8 +9,8 @@ function generateOrderNumber() {
 
 export async function POST(req: NextRequest) {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Ensure DB user exists
@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
       where: { email },
       create: {
         email,
-        name: cuser?.fullName || cuser?.firstName || email,
-        password: "", // not used for Clerk users
+        name: session?.user?.name || email,
+        password: "", // required by schema but unused for session users
       },
       update: {},
     });

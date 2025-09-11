@@ -35,9 +35,9 @@ export default function CheckoutPage() {
         body: JSON.stringify(form),
       });
       if (res.status === 401) {
-        // redirect to Clerk sign-in and return back
+        // redirect to sign-in and return back
         const cb = encodeURIComponent("/checkout");
-        window.location.href = `/sign-in?redirect_url=${cb}`;
+        window.location.href = `/sign-in?callbackUrl=${cb}`;
         return;
       }
       const data = await res.json();
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
         if (res.status === 401) {
           const cb = encodeURIComponent("/checkout");
           if (typeof window !== "undefined") {
-            window.location.href = `/sign-in?redirect_url=${cb}`;
+            window.location.href = `/sign-in?callbackUrl=${cb}`;
           }
           return;
         }

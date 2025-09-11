@@ -47,7 +47,7 @@ export default function ProductDetails({ product }: { product: Product }) {
   const [qty, setQty] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [toast, setToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
-  const { addToCart, fetchCartCount } = useCartStore();
+  const { addToCart, fetchCartCount, getCartCount } = useCartStore();
 
   // Compute a fallback price from variants (min price) since Product has no direct price field
   const variantPrices: number[] = Array.isArray(variants)
@@ -92,6 +92,7 @@ export default function ProductDetails({ product }: { product: Product }) {
 
   const handleAddToCart = async () => {
     const cartItem = getCartItem();
+    console.log("item is doing cart", cartItem)
     if (!cartItem) {
       setToast({ show: true, message: 'Please select a variant' });
       setTimeout(() => setToast({ show: false, message: '' }), 3000);
@@ -106,8 +107,18 @@ export default function ProductDetails({ product }: { product: Product }) {
       return;
     }
 
+    console.log("max:", max)
+
     try {
       setIsAddingToCart(true);
+      console.log("cartItem", cartItem)
+      const cartItemStore = {
+        ...cartItem,
+        quantity: qty,
+        variantId: cartItem.id, 
+        maxQuantity: max,
+      }
+
       const res = await fetch("/api/cart/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -129,13 +140,16 @@ export default function ProductDetails({ product }: { product: Product }) {
       }
       
       // Refresh the cart state
-      await fetchCartCount();
+      // await fetchCartCount(); 
       
       // Show success message
       setToast({ 
         show: true, 
         message: `✅ Successfully added ${qty}x ${product.name} to cart!` 
       });
+
+      addToCart(cartItemStore);
+      console.log("getCartCount", getCartCount())
       
       // Clear toast after delay
       setTimeout(() => setToast({ show: false, message: '' }), 3000);

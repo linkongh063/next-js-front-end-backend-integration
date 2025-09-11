@@ -28,7 +28,7 @@ export async function GET() {
         },
       },
     });
-
+    console.log("cart from the api",cart);
     return NextResponse.json(cart ?? { items: [] });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? "Server error" }, { status: 500 });

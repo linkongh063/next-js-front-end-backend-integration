@@ -22,23 +22,30 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  console.log("cart from cart page", cart)
+
+  // Fetch cart data when component mounts
+  useEffect(() => {
+    fetchCartCount().catch(console.error);
+  }, [fetchCartCount]);
+
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     
     setLoading(true);
     try {
-      const res = await fetch(`/api/cart/items/${itemId}`, {
+      const res = await fetch('/api/cart/items', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQuantity })
+        body: JSON.stringify({ itemId, quantity: newQuantity })
       });
       
       if (!res.ok) throw new Error('Failed to update quantity');
       
       updateQuantity(itemId, newQuantity);
-      fetchCartCount();
+      await fetchCartCount();
     } catch (error) {
-      setError('Failed to update quantity');
+      setError('Failed to update item');
       console.error('Update quantity error:', error);
     } finally {
       setLoading(false);
@@ -50,14 +57,16 @@ export default function CartPage() {
     
     setLoading(true);
     try {
-      const res = await fetch(`/api/cart/items/${itemId}`, {
+      const res = await fetch('/api/cart/items', {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId })
       });
       
       if (!res.ok) throw new Error('Failed to remove item');
       
       removeFromCart(itemId);
-      fetchCartCount();
+      await fetchCartCount(); // Refresh cart count from server
     } catch (error) {
       setError('Failed to remove item');
       console.error('Remove item error:', error);
@@ -67,7 +76,7 @@ export default function CartPage() {
   };
 
   const subtotal = useMemo(() => 
-    cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    cart.reduce((sum, item) => sum + (Number(item.price || 0) * item.quantity), 0)
   , [cart]);
 
   if (error) {
@@ -94,7 +103,7 @@ export default function CartPage() {
                 <div className="h-24 w-24 bg-gray-100 rounded-md flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="font-medium">{item.name}</h3>
-                  <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
+                  <p className="text-sm font-medium">${Number(item.price || 0).toFixed(2)}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <Button
                       variant="outline"
@@ -136,7 +145,7 @@ export default function CartPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-medium">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ${(Number(item.price || 0) * item.quantity).toFixed(2)}
                   </p>
                 </div>
               </div>

@@ -19,7 +19,7 @@ export default function OrdersList() {
         if (res.status === 401) {
           if (typeof window !== "undefined") {
             const cb = encodeURIComponent("/orders");
-            window.location.href = `/sign-in?redirect_url=${cb}`;
+            window.location.href = `/sign-in?callbackUrl=${cb}`;
           }
           return;
         }

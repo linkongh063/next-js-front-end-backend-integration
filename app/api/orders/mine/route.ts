@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 export async function GET() {
   try {
-    const cuser = await currentUser();
-    const email = cuser?.emailAddresses?.[0]?.emailAddress;
+    const session = await auth();
+    const email = session?.user?.email ?? undefined;
     if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Ensure DB user exists
@@ -13,7 +13,7 @@ export async function GET() {
       where: { email },
       create: {
         email,
-        name: cuser?.fullName || cuser?.firstName || email,
+        name: session?.user?.name || email,
         password: "",
       },
       update: {},
