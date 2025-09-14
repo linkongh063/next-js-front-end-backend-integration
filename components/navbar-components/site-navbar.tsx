@@ -49,32 +49,6 @@ export async function SiteNavbar() {
                 </li>
               ))
             }
-            {/* {cats.map((c) => (
-              <li key={c.id}>
-                <Link
-                  href={`/shop?category=${c.id}`}
-                  className="text-sm font-medium hover:text-gray-600"
-                >
-                  {c.name}
-                </Link>
-              </li>
-            ))} */}
-            {/* <li>
-              <Link
-                href="/new-arrivals"
-                className="text-sm font-medium hover:text-gray-600"
-              >
-                New Arrivals
-              </Link>
-            </li> */}
-            {/* <li>
-              <Link
-                href="/sale"
-                className="text-sm font-medium hover:text-gray-600"
-              >
-                Sale
-              </Link>
-            </li> */}
           </ul>
         </nav>
 
