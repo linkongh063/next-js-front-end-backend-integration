@@ -11,6 +11,7 @@ import SiteNavbar from "@/components/navbar-components/site-navbar";
 import Footer from "@/components/footer";
 import ProductCard from "@/components/client/ProductCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/auth";
 
 // Mock data for categories
 const categories = [
