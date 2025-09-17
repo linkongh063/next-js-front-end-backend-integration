@@ -11,13 +11,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await auth();
   const email = (session as any)?.user?.email as string | undefined;
   const role = (session as any)?.user?.role as Role | undefined;
+  console.log("email", email, 'session', session)
   if (!email || role !== "ADMIN") {
-    redirect("/superadmin/sign-in");
+    redirect("/sign-in");
   }
   // Ensure the admin exists (optional extra check)
   const dbUser = await prisma.user.findUnique({ where: { email } });
   if (!dbUser || dbUser.role !== "ADMIN") {
-    redirect("/superadmin/sign-in");
+    redirect("/sign-in");
   }
   return (
     <SidebarProvider>

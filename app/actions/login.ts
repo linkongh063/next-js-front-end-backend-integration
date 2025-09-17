@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/auth";
 import { revalidatePath } from "next/cache";
+import prisma from "@/lib/prisma";
 
 // export async function doSocialLogin(formData) {
 //     const action = formData.get('action');
@@ -17,7 +18,24 @@ export async function doCredentialLogin(formData: FormData) {
   console.log("formData", formData);
 
   try {
-    const callbackUrl = (formData.get("callbackUrl") || "/profile/profileinfo").toString();
+    let callbackUrl = (formData.get("callbackUrl") || "/profile/profileinfo").toString();
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+      },
+    });
+
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
+
+    console.log("user", user);
+    if(user.role === "ADMIN"){
+      callbackUrl = "/dashboard";
+    }
+
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
