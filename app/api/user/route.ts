@@ -13,7 +13,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { name, email, password, phone } = await request.json();
+    console.log('name', name)
+    console.log('email', email)
+    console.log('password', password)
+    console.log('phone', phone)
     const user = await UserService.createUser(name, email, password, phone);
+    console.log('user', user)
     return Response.json(user, { status: 201 });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 400 });

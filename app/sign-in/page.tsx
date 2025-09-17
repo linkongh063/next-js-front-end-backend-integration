@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Mail, Lock } from "lucide-react"
+import Link from "next/link"
 
 // Wrapper to satisfy Next.js requirement: useSearchParams must be within Suspense
 export default function LoginPage() {
@@ -74,9 +75,9 @@ function LoginPageInner() {
           </form>
           <div className="mt-6 text-center text-sm text-gray-500">
             Don’t have an account? {" "}
-            <a href="/register" className="font-medium text-blue-600 hover:underline">
+            <Link href="/sign-up" className="font-medium text-blue-600 hover:underline">
               Sign up
-            </a>
+            </Link>
           </div>
         </CardContent>
       </Card>

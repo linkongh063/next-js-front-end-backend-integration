@@ -9,26 +9,26 @@ const rootRoute = '/'
 const privateRoute = ["/cart/:path*", "/profile/:path*", "/admin/:path*"]
 
 export default auth(async function middleware(req: NextRequest) {
-  const { nextUrl } = req
-  const session = await auth()
-  // console.log('called middleware when matcher is there')
-  // console.log('nextUrl', nextUrl)
-  // console.log('session', session)
+  const { nextUrl } = req;
+  
+  // Skip middleware for API routes
+  if (nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
 
-
+  const session = await auth();
   const isAuthenticated = !!session?.user;
 
   const isPublicRoute = ((publicPaths.find(route => nextUrl.pathname.startsWith(route))
   || nextUrl.pathname === rootRoute) && !privateRoute.find(route => nextUrl.pathname.includes(route)));
 
-  console.log('isPublicRoute:',isPublicRoute);
+  console.log('isPublicRoute:', isPublicRoute);
 
-
-  if (!isAuthenticated && !isPublicRoute)
+  if (!isAuthenticated && !isPublicRoute) {
     return Response.redirect(new URL('/sign-in', nextUrl));
+  }
 
-
-  return NextResponse.next()
+  return NextResponse.next();
 })
 
 export const config = {

@@ -17,6 +17,8 @@ model User {
   profilePicture String?
   role           Role       @default(CUSTOMER)
   updatedAt      DateTime   @updatedAt
+  
+  // relationship one to many
   addresses      Address[]
   carts          Cart[]
   orders         Order[]
