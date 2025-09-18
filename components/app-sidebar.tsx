@@ -33,9 +33,9 @@ const data = {
   },
   teams: [
     {
-      name: "Ecom BD",
+      name: "ECOMX",
       logo: PieChart,
-      plan: "Pro",
+      plan: "Standard",
     },
     {
       name: "Warehouse Unit",
@@ -88,6 +88,10 @@ const data = {
           url: "/product-variant",
         },
         {
+          title: "Variant Manager",
+          url: "/product-variant-manager",
+        },
+        {
           title: "Categories",
           url: "/categories",
         },
@@ -97,21 +101,21 @@ const data = {
         },
       ],
     },
-    {
-      title: "Customers & Reviews",
-      url: "/dashboard/customers",
-      icon: GalleryVerticalEnd,
-      items: [
-        {
-          title: "Customer List",
-          url: "/customers",
-        },
-        {
-          title: "Reviews",
-          url: "/dashboard/reviews",
-        },
-      ],
-    },
+    // {
+    //   title: "Customers & Reviews",
+    //   url: "/dashboard/customers",
+    //   icon: GalleryVerticalEnd,
+    //   items: [
+    //     {
+    //       title: "Customer List",
+    //       url: "/customers",
+    //     },
+    //     {
+    //       title: "Reviews",
+    //       url: "/dashboard/reviews",
+    //     },
+    //   ],
+    // },
     // {
     //   title: "Analytics",
     //   url: "/dashboard/analytics",
@@ -136,33 +140,33 @@ const data = {
     //     },
     //   ],
     // },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings2,
-      items: [
-        {
-          title: "General Settings",
-          url: "/dashboard/settings/general",
-        },
-        {
-          title: "Shipping",
-          url: "/dashboard/settings/shipping",
-        },
-        {
-          title: "Payments",
-          url: "/dashboard/settings/payments",
-        },
-        {
-          title: "Tax",
-          url: "/dashboard/settings/tax",
-        },
-        {
-          title: "Admin Users",
-          url: "/dashboard/settings/admins",
-        },
-      ],
-    },
+    // {
+    //   title: "Settings",
+    //   url: "/dashboard/settings",
+    //   icon: Settings2,
+    //   items: [
+    //     {
+    //       title: "General Settings",
+    //       url: "/dashboard/settings/general",
+    //     },
+    //     {
+    //       title: "Shipping",
+    //       url: "/dashboard/settings/shipping",
+    //     },
+    //     {
+    //       title: "Payments",
+    //       url: "/dashboard/settings/payments",
+    //     },
+    //     {
+    //       title: "Tax",
+    //       url: "/dashboard/settings/tax",
+    //     },
+    //     {
+    //       title: "Admin Users",
+    //       url: "/dashboard/settings/admins",
+    //     },
+    //   ],
+    // },
   ],
   projects: [
     {

@@ -1,0 +1,8 @@
+import { UserProfile } from "@clerk/clerk-react";
+
+export default function UserProfilePage() {
+  return  <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    hello 
+  </div>
+  // return <UserProfile path="/user-profile" />;
+}

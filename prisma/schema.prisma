@@ -17,6 +17,8 @@ model User {
   profilePicture String?
   role           Role       @default(CUSTOMER)
   updatedAt      DateTime   @updatedAt
+  
+  // relationship one to many
   addresses      Address[]
   carts          Cart[]
   orders         Order[]
@@ -80,6 +82,29 @@ model Product {
   wishlists   Wishlist[]
 }
 
+model Attribute {
+  id        String            @id @default(uuid())
+  name      String            // e.g. "Size", "Color", "Width"
+  createdAt DateTime          @default(now())
+  values    AttributeValue[]
+}
+
+model AttributeValue {
+  id          String    @id @default(uuid())
+  attributeId String
+  value       String    // e.g. "Red", "Blue", "42", "XL"
+  attribute   Attribute @relation(fields: [attributeId], references: [id])
+  variants    ProductVariantAttribute[]
+}
+
+model ProductVariantAttribute {
+  id             String          @id @default(uuid())
+  variantId      String
+  attributeValueId String
+  variant        ProductVariant  @relation(fields: [variantId], references: [id])
+  attributeValue AttributeValue  @relation(fields: [attributeValueId], references: [id])
+}
+
 model ProductVariant {
   id                  String         @id @default(uuid())
   productId           String
@@ -94,7 +119,9 @@ model ProductVariant {
   inventoryLogs       InventoryLog[]
   orderItems          OrderItem[]
   product             Product        @relation(fields: [productId], references: [id])
+  attributes          ProductVariantAttribute[]
 }
+
 
 model ProductImage {
   id         String   @id @default(uuid())

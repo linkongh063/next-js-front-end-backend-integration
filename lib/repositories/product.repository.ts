@@ -1,15 +1,24 @@
-import prisma  from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 export const ProductRepository = {
-  findAll: () =>
-    prisma.product.findMany({
+
+  findAll: () => {
+    // console.log('hit the apis')
+    const product = prisma.product.findMany({
+      where: {
+        status: 'ACTIVE'
+      },
       include: {
         brand: true,
         category: true,
         variants: true,
         images: true,
       },
-    }),
+    })
+    // console.log('product',product)
+    return product
+  }
+  ,
 
   findById: (id: string) =>
     prisma.product.findUnique({

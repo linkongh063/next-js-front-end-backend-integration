@@ -56,10 +56,12 @@ import {
   CheckCircle,
   XCircle
 } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
-export default function ProductVariantsPage() {
+export default function ProductVariantsTable({productVariant, product}) {
   const [variants, setVariants] = useState([]);
   const [products, setProducts] = useState([]);
+  const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [productFilter, setProductFilter] = useState("all");
@@ -76,21 +78,28 @@ export default function ProductVariantsPage() {
     cost: "",
     stockQuantity: "",
     stockAlertThreshold: "5",
-    isDefault: false
+    isDefault: false,
+    attributeValueIds: [],
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
+  const [adjustingVariant, setAdjustingVariant] = useState(null);
+  const [adjustQty, setAdjustQty] = useState(0);
+  const [adjustReason, setAdjustReason] = useState('MANUAL');
+  const [adjustNote, setAdjustNote] = useState('');
+  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyVariant, setHistoryVariant] = useState(null);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const router = useRouter();
 
   // Fetch data from APIs
   const fetchVariants = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/product-variants");
-      if (!response.ok) {
-        throw new Error("Failed to fetch product variants");
-      }
-      const data = await response.json();
-      setVariants(data);
+      setVariants(productVariant);
     } catch (error) {
       console.error("Error fetching product variants:", error);
     } finally {
@@ -100,21 +109,29 @@ export default function ProductVariantsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/products");
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = await response.json();
-      setProducts(data);
+      setProducts(product);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
   };
 
+  const fetchAttributes = async () => {
+    try {
+      const res = await fetch('/api/attributes', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to load attributes');
+      const data = await res.json();
+      setAttributes(data || []);
+    } catch (err) {
+      console.error('Error fetching attributes:', err);
+    }
+  };
+
+  // Sync local state from server props whenever they change
   useEffect(() => {
     fetchVariants();
     fetchProducts();
-  }, []);
+    fetchAttributes();
+  }, [productVariant, product]);
 
   // Filter and sort variants
   const filteredAndSortedVariants = useMemo(() => {
@@ -241,6 +258,7 @@ export default function ProductVariantsPage() {
           cost: formData.cost ? parseFloat(formData.cost) : null,
           stockQuantity: parseInt(formData.stockQuantity),
           stockAlertThreshold: parseInt(formData.stockAlertThreshold),
+          attributeValueIds: formData.attributeValueIds,
         }),
       });
 
@@ -250,7 +268,8 @@ export default function ProductVariantsPage() {
         throw new Error(errorMessage);
       }
 
-      await fetchVariants(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving product variant:", error);
@@ -271,10 +290,69 @@ export default function ProductVariantsPage() {
         throw new Error("Failed to delete product variant");
       }
 
-      await fetchVariants(); // Refresh the list
+      // Revalidate server data and update props
+      router.refresh();
     } catch (error) {
       console.error("Error deleting product variant:", error);
       alert(`Error: ${error.message}`);
+    }
+  };
+
+  // Inventory: open adjust dialog
+  const openAdjustDialog = (variant) => {
+    setAdjustingVariant(variant);
+    setAdjustQty(0);
+    setAdjustReason('MANUAL');
+    setAdjustNote('');
+    setIsAdjustDialogOpen(true);
+  };
+
+  // Inventory: submit adjust
+  const submitAdjust = async (e) => {
+    e?.preventDefault?.();
+    if (!adjustingVariant) return;
+    if (!Number.isInteger(Number(adjustQty))) {
+      alert('Quantity change must be an integer');
+      return;
+    }
+    setIsAdjusting(true);
+    try {
+      const res = await fetch('/api/inventory/adjust', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variantId: adjustingVariant.id,
+          change: Number(adjustQty),
+          reason: adjustReason,
+          note: adjustNote || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || 'Failed to adjust inventory');
+      setIsAdjustDialogOpen(false);
+      setAdjustingVariant(null);
+      router.refresh();
+    } catch (err) {
+      alert(err?.message || 'Adjustment failed');
+    } finally {
+      setIsAdjusting(false);
+    }
+  };
+
+  // Inventory: open history dialog
+  const openHistoryDialog = async (variant) => {
+    setHistoryVariant(variant);
+    setIsHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/inventory/logs?variantId=${variant.id}`);
+      const data = await res.json();
+      setHistoryItems(data?.items || []);
+    } catch (e) {
+      console.error('Failed to load history', e);
+      setHistoryItems([]);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -287,7 +365,8 @@ export default function ProductVariantsPage() {
       cost: "",
       stockQuantity: "",
       stockAlertThreshold: "5",
-      isDefault: false
+      isDefault: false,
+      attributeValueIds: [],
     });
     setFormErrors({});
     setEditingVariant(null);
@@ -302,7 +381,10 @@ export default function ProductVariantsPage() {
       cost: variant.cost ? variant.cost.toString() : "",
       stockQuantity: variant.stockQuantity.toString(),
       stockAlertThreshold: variant.stockAlertThreshold.toString(),
-      isDefault: variant.isDefault
+      isDefault: variant.isDefault,
+      attributeValueIds: Array.isArray(variant.attributes)
+        ? variant.attributes.map((a) => a.attributeValueId)
+        : [],
     });
     setFormErrors({});
     setEditingVariant(variant);
@@ -320,7 +402,8 @@ export default function ProductVariantsPage() {
       cost: "",
       stockQuantity: "",
       stockAlertThreshold: "5",
-      isDefault: false
+      isDefault: false,
+      attributeValueIds: [],
     });
     setFormErrors({});
   };
@@ -333,6 +416,14 @@ export default function ProductVariantsPage() {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const toggleAttributeValue = (valueId) => {
+    setFormData((prev) => {
+      const set = new Set(prev.attributeValueIds || []);
+      if (set.has(valueId)) set.delete(valueId); else set.add(valueId);
+      return { ...prev, attributeValueIds: Array.from(set) };
+    });
   };
 
   const getSortIcon = (field) => {
@@ -608,6 +699,22 @@ export default function ProductVariantsPage() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openAdjustDialog(variant)}
+                            title="Adjust stock"
+                          >
+                            <Package className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openHistoryDialog(variant)}
+                            title="Inventory history"
+                          >
+                            <ArrowUpDown className="h-4 w-4" />
+                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="outline" size="sm">
@@ -750,6 +857,31 @@ export default function ProductVariantsPage() {
                 )}
               </div>
             </div>
+            {!!attributes.length && (
+              <div className="space-y-3">
+                <Label>Attributes</Label>
+                <div className="space-y-2">
+                  {attributes.map((attr) => (
+                    <div key={attr.id} className="border rounded-md p-3">
+                      <div className="font-medium mb-2">{attr.name}</div>
+                      <div className="flex flex-wrap gap-3">
+                        {attr.values?.map((val) => (
+                          <label key={val.id} className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300"
+                              checked={formData.attributeValueIds?.includes(val.id)}
+                              onChange={() => toggleAttributeValue(val.id)}
+                            />
+                            <span>{val.value}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -879,6 +1011,31 @@ export default function ProductVariantsPage() {
                 )}
               </div>
             </div>
+            {!!attributes.length && (
+              <div className="space-y-3">
+                <Label>Attributes</Label>
+                <div className="space-y-2">
+                  {attributes.map((attr) => (
+                    <div key={attr.id} className="border rounded-md p-3">
+                      <div className="font-medium mb-2">{attr.name}</div>
+                      <div className="flex flex-wrap gap-3">
+                        {attr.values?.map((val) => (
+                          <label key={val.id} className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300"
+                              checked={formData.attributeValueIds?.includes(val.id)}
+                              onChange={() => toggleAttributeValue(val.id)}
+                            />
+                            <span>{val.value}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -898,6 +1055,88 @@ export default function ProductVariantsPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Adjust Stock Dialog */}
+      <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adjust Stock</DialogTitle>
+            <DialogDescription>
+              Increase or decrease stock for SKU {adjustingVariant?.sku}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitAdjust} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="adjustQty">Change Quantity</Label>
+              <Input
+                id="adjustQty"
+                type="number"
+                step="1"
+                value={adjustQty}
+                onChange={(e) => setAdjustQty(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">Use negative numbers to reduce stock.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason</Label>
+              <Select value={adjustReason} onValueChange={setAdjustReason}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="RESTOCK">Restock</SelectItem>
+                  <SelectItem value="RETURN">Return</SelectItem>
+                  <SelectItem value="CORRECTION">Correction</SelectItem>
+                  <SelectItem value="MANUAL">Manual</SelectItem>
+                  <SelectItem value="SALE">Sale</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adjustNote">Note (optional)</Label>
+              <Input id="adjustNote" value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={isAdjusting}>{isAdjusting ? 'Applying...' : 'Apply'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Inventory History Dialog */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Inventory History</DialogTitle>
+            <DialogDescription>
+              Recent inventory changes for SKU {historyVariant?.sku}
+            </DialogDescription>
+          </DialogHeader>
+          {historyLoading ? (
+            <div className="py-6"><Skeleton className="h-6 w-full" /></div>
+          ) : (
+            <div className="space-y-3 max-h-80 overflow-auto">
+              {historyItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No history found.</p>
+              ) : (
+                historyItems.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between border rounded p-2">
+                    <div className="text-sm">
+                      <div className="font-medium">{log.reason} {log.change > 0 ? '+' : ''}{log.change}</div>
+                      {log.note && <div className="text-muted-foreground">{log.note}</div>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleString()}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsHistoryOpen(false)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
